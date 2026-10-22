@@ -4,112 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Comunicação após o AVC</title>
-<meta name="description" content="Pesquisa de base e roteiro de entrevista com a família para desenhar um app de comunicação alternativa pós-AVC.">
+<meta name="description" content="Pesquisa de base para desenhar um app de comunicação alternativa pós-AVC.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#f7f3ec; --surface:#fffdf9; --surface-2:#f0e9dd; --ink:#22201c; --muted:#5f594f;
-  --line:#ddd3c3; --accent:#1f6f62; --accent-ink:#ffffff; --accent-soft:#d9ece7;
-  --warm:#b5552b; --warm-soft:#f6e1d5; --gold:#a87a12; --gold-soft:#f4ead0;
-  --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.05),0 6px 20px rgba(60,40,20,.06);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#171614; --surface:#211f1c; --surface-2:#2a2723; --ink:#f0ebe2; --muted:#b4ab9d;
-    --line:#3a362f; --accent:#5cc0ad; --accent-ink:#10201d; --accent-soft:#1f3631;
-    --warm:#f0956a; --warm-soft:#3a2519; --gold:#e3b84f; --gold-soft:#352c14;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#171614; --surface:#211f1c; --surface-2:#2a2723; --ink:#f0ebe2; --muted:#b4ab9d;
-  --line:#3a362f; --accent:#5cc0ad; --accent-ink:#10201d; --accent-soft:#1f3631;
-  --warm:#f0956a; --warm-soft:#3a2519; --gold:#e3b84f; --gold-soft:#352c14;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;font-size:18px;line-height:1.6}
-a{color:var(--accent)}
-h1,h2,h3{font-family:"Fraunces",Georgia,serif;line-height:1.2;margin:0 0 .5em}
-h1{font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-.01em}
-h2{font-size:clamp(1.5rem,3.5vw,2.1rem);margin-top:0}
-h3{font-size:1.2rem}
-p{margin:0 0 1em}
-.wrap{max-width:960px;margin:0 auto;padding:0 16px}
-header.hero{padding:56px 0 36px;border-bottom:1px solid var(--line)}
-.eyebrow{display:inline-block;font-size:.85rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
-.lede{font-size:1.2rem;color:var(--muted);max-width:44em}
-nav.toc{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
-nav.toc .wrap{display:flex;gap:6px;overflow-x:auto;padding-top:10px;padding-bottom:10px;align-items:center}
-nav.toc a{white-space:nowrap;text-decoration:none;color:var(--ink);font-size:.95rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
-nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--accent)}
-.theme-btn{margin-left:auto}
-section{padding:48px 0;border-bottom:1px solid var(--line)}
-.grid{display:grid;gap:16px}
-@media(min-width:720px){.grid.c3{grid-template-columns:repeat(3,1fr)}.grid.c2{grid-template-columns:repeat(2,1fr)}}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
-.card h3{margin-bottom:.35em}
-.tag{display:inline-block;font-size:.8rem;font-weight:700;padding:2px 10px;border-radius:999px;margin-bottom:10px}
-.tag.lang{background:var(--accent-soft);color:var(--accent)}
-.tag.motor{background:var(--warm-soft);color:var(--warm)}
-.tag.plan{background:var(--gold-soft);color:var(--gold)}
-.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:16px 20px;border-radius:0 var(--radius) var(--radius) 0;margin:20px 0}
-.callout.warm{border-color:var(--warm);background:var(--warm-soft)}
-.callout p:last-child{margin:0}
-ul.clean{padding-left:1.2em;margin:0 0 1em}
-ul.clean li{margin-bottom:.4em}
-.stat{font-family:"Fraunces",serif;font-size:2.4rem;color:var(--accent);line-height:1}
-.stat-label{color:var(--muted);font-size:.95rem}
-table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--radius);overflow:hidden;border:1px solid var(--line)}
-th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-th{background:var(--surface-2);font-size:.95rem}
-tr:last-child td{border-bottom:0}
-.table-scroll{overflow-x:auto}
-.tool-type{font-size:.85rem;color:var(--muted)}
-
-/* Roteiro */
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 8px}
-button,.btn{font:inherit;font-size:.95rem;cursor:pointer;border-radius:10px;padding:10px 16px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
-button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
-button:hover{border-color:var(--accent)}
-button:focus-visible,textarea:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.meta-fields{display:grid;gap:12px;margin:16px 0}
-@media(min-width:720px){.meta-fields{grid-template-columns:repeat(3,1fr)}}
-label.field span{display:block;font-size:.9rem;font-weight:700;margin-bottom:4px}
-input[type=text],input[type=date],textarea{width:100%;font:inherit;font-size:1rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-textarea{min-height:76px;resize:vertical}
-.progress{height:10px;background:var(--surface-2);border-radius:999px;overflow:hidden;margin:8px 0 4px}
-.progress > div{height:100%;width:0;background:var(--accent);transition:width .3s}
-.progress-label{font-size:.9rem;color:var(--muted)}
-details.block{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin:12px 0;box-shadow:var(--shadow)}
-details.block > summary{cursor:pointer;list-style:none;padding:16px 20px;display:flex;align-items:center;gap:12px;font-family:"Fraunces",serif;font-size:1.15rem}
-details.block > summary::-webkit-details-marker{display:none}
-details.block > summary .count{margin-left:auto;font-family:"Atkinson Hyperlegible",sans-serif;font-size:.85rem;color:var(--muted);white-space:nowrap}
-details.block > summary .letter{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;font-family:"Atkinson Hyperlegible",sans-serif;font-size:.95rem;flex:none}
-.block-body{padding:0 20px 16px}
-.block-why{color:var(--muted);font-size:.95rem;margin-bottom:12px}
-.q{margin:0 0 16px}
-.q label{display:block;font-weight:700;margin-bottom:6px}
-.q .num{color:var(--accent);margin-right:6px}
-.saved{font-size:.85rem;color:var(--muted);min-height:1.2em}
-.privacy{font-size:.9rem;color:var(--muted)}
-footer{padding:36px 0 60px;color:var(--muted);font-size:.95rem}
-ol.sources{padding-left:1.2em}
-ol.sources li{margin-bottom:.35em}
-
-@media print{
-  nav.toc,.toolbar,.theme-btn,.no-print{display:none!important}
-  body{background:#fff;color:#000;font-size:12pt}
-  section{padding:16px 0;break-inside:auto}
-  details.block{box-shadow:none;break-inside:avoid}
-  details.block:not([open]) > .block-body{display:block}
-  .card{box-shadow:none}
-  textarea{border:1px solid #999;min-height:60px}
-}
-</style>
+<link rel="stylesheet" href="estilo.css">
 </head>
 <body>
 
@@ -117,7 +16,7 @@ ol.sources li{margin-bottom:.35em}
   <div class="wrap">
     <span class="eyebrow">Pesquisa de base · App de comunicação pós-AVC</span>
     <h1>Comunicação após o AVC</h1>
-    <p class="lede">O que o AVC pode causar na comunicação, o que já existe para ajudar (dentro e fora da tecnologia) e um roteiro de conversa com a família para desenharmos a arquitetura do app.</p>
+    <p class="lede">O que o AVC pode causar na comunicação, o que já existe para ajudar (dentro e fora da tecnologia) e como as respostas da família vão orientar a arquitetura do app. O roteiro de entrevista fica numa <a href="roteiro.html">página própria</a>.</p>
   </div>
 </header>
 
@@ -126,7 +25,7 @@ ol.sources li{margin-bottom:.35em}
     <a href="#efeitos">O que o AVC causa</a>
     <a href="#existe">O que já existe</a>
     <a href="#licoes">Lições para o design</a>
-    <a href="#roteiro">Roteiro de entrevista</a>
+    <a href="roteiro.html"><strong>Roteiro de entrevista →</strong></a>
     <a href="#arquitetura">Respostas → arquitetura</a>
     <a href="#fontes">Fontes</a>
     <button class="theme-btn" type="button" id="themeBtn" aria-label="Alternar tema claro ou escuro">◐ Tema</button>
@@ -252,47 +151,10 @@ ol.sources li{margin-bottom:.35em}
   </div>
 </section>
 
-<section id="roteiro">
-  <div class="wrap">
-    <h2>4. Roteiro de entrevista com a família</h2>
-    <div class="callout">
-      <p><strong>Antes de começar:</strong></p>
-      <ul class="clean">
-        <li><strong>Ouça também a própria pessoa</strong>, com conversa apoiada: perguntas de sim/não, palavras-chave escritas, fotos. A família às vezes subestima o quanto ela entende.</li>
-        <li><strong>Peça o relatório da fonoaudiologia</strong>, se houver.</li>
-        <li><strong>Note como a família se sente</strong> — culpa, cansaço, falar “por cima” da pessoa. Isso também é dado de design.</li>
-      </ul>
-    </div>
-
-    <p class="privacy no-print">🔒 As respostas ficam salvas apenas neste navegador, neste aparelho. Nada é enviado para lugar nenhum. Use “Exportar” para guardar uma cópia.</p>
-
-    <div class="meta-fields">
-      <label class="field"><span>Família / pessoa (apelido ou iniciais)</span><input type="text" id="meta-nome" autocomplete="off"></label>
-      <label class="field"><span>Quem respondeu</span><input type="text" id="meta-quem" autocomplete="off"></label>
-      <label class="field"><span>Data da conversa</span><input type="date" id="meta-data"></label>
-    </div>
-
-    <div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
-    <div class="progress-label" id="progressLabel" aria-live="polite">0 de 0 perguntas respondidas</div>
-
-    <div class="toolbar no-print">
-      <button type="button" class="primary" id="btnMd">Exportar (.md)</button>
-      <button type="button" id="btnJson">Exportar dados (.json)</button>
-      <label class="btn" for="fileImport" style="display:inline-block">Importar .json</label>
-      <input type="file" id="fileImport" accept="application/json" hidden>
-      <button type="button" id="btnExpand">Abrir todos</button>
-      <button type="button" id="btnPrint">Imprimir</button>
-      <button type="button" id="btnClear">Limpar respostas</button>
-    </div>
-    <div class="saved" id="savedMsg" aria-live="polite"></div>
-
-    <div id="blocks"></div>
-  </div>
-</section>
-
 <section id="arquitetura">
   <div class="wrap">
-    <h2>5. Como as respostas viram arquitetura</h2>
+    <h2>4. Como as respostas viram arquitetura</h2>
+    <p>Cada bloco do <a href="roteiro.html">roteiro de entrevista</a> alimenta uma decisão de design.</p>
     <div class="table-scroll">
     <table>
       <thead><tr><th>O que a família responder</th><th>Decisão no app</th></tr></thead>
@@ -342,166 +204,13 @@ ol.sources li{margin-bottom:.35em}
 
 <script>
 (function(){
-  var BLOCKS = [
-    {id:"A", title:"Situação atual", why:"Situa o quadro e o momento da recuperação.", qs:[
-      "Quando foi o AVC? Foi o primeiro?",
-      "Qual lado do corpo foi afetado?",
-      "Faz fonoaudiologia? A fono deu algum nome ao quadro (afasia, disartria, apraxia)?",
-      "A comunicação está melhorando, estável ou piorando?"
-    ]},
-    {id:"B", title:"Compreensão", why:"Define se o app precisa de voz, imagem ou texto para ser entendido.", qs:[
-      "Ela entende quando vocês falam? E frases longas? E com várias pessoas falando ao mesmo tempo?",
-      "Responde “sim” e “não” de forma confiável (fala, cabeça, gesto)? Às vezes diz “sim” querendo dizer “não”?",
-      "Consegue ler? Palavras soltas, frases curtas, textos?",
-      "Reconhece fotos de pessoas e objetos? E desenhos ou ícones?"
-    ]},
-    {id:"C", title:"Expressão", why:"Mostra por onde a mensagem consegue sair hoje.", qs:[
-      "Fala alguma coisa? O quê: palavras soltas, frases prontas, palavrões, palavras trocadas?",
-      "A fala sai mas difícil de entender (arrastada, fraca)? Ou a palavra simplesmente não vem?",
-      "Consegue escrever, mesmo pouco? Com qual mão?",
-      "Usa gestos, aponta, desenha, faz mímica?",
-      "Hoje, como vocês descobrem o que ela quer? Que “sistema” a família já criou sem perceber?"
-    ]},
-    {id:"D", title:"Corpo, sentidos e energia", why:"Define tamanho de botões, layout, forma de seleção e duração de uso.", qs:[
-      "Qual mão usa agora? Tem tremor ou dificuldade para tocar em coisas pequenas?",
-      "Como está a visão? Usa óculos? Parece ignorar um dos lados (esbarra em coisas, come só metade do prato)?",
-      "Como está a audição?",
-      "Cansa rápido? Em que horário está melhor?",
-      "Fica mais na cama, na cadeira ou anda pela casa?"
-    ]},
-    {id:"E", title:"Rotina e necessidades", why:"Organiza o que precisa estar a um toque e o que pode ficar mais fundo.", qs:[
-      "Descrevam um dia típico, do acordar ao dormir.",
-      "O que ela mais precisa comunicar: necessidades básicas, dor, desconforto, emoções, vontades, conversar sobre a vida?",
-      "Em que momentos a comunicação mais falha e mais frustra?",
-      "Com quem ela conversa? Quem cuida dela em cada período?",
-      "Sai de casa? Para onde (médico, igreja, parentes)? Precisa se comunicar com estranhos?"
-    ]},
-    {id:"F", title:"História de vida e identidade", why:"Vira o vocabulário pessoal do app — o que mais protege contra o abandono.", qs:[
-      "Quem são as pessoas importantes? Nomes, apelidos, fotos.",
-      "Do que ela gosta? Comidas, músicas, programas, time, fé, assuntos.",
-      "Qual era o trabalho dela? Do que tinha orgulho?",
-      "Tinha expressões típicas, jeito de brincar, humor próprio?",
-      "Do que ela gostaria de falar e hoje não consegue?"
-    ]},
-    {id:"G", title:"Tecnologia e contexto", why:"Define plataforma, conectividade e quem mantém o conteúdo.", qs:[
-      "Usava celular antes do AVC? Para quê, com que facilidade?",
-      "Qual aparelho está disponível (Android, iPhone, tablet)? Há internet em casa?",
-      "Quem da família poderia configurar e atualizar o app? Tem tempo e paciência para isso?",
-      "Já tentaram alguma prancha, aplicativo ou caderno? O que funcionou, o que foi abandonado e por quê?"
-    ]},
-    {id:"H", title:"Emoções e relação", why:"Orienta o tom do app e o apoio ao parceiro de conversa.", qs:[
-      "Como ela reage quando não consegue se fazer entender? Desiste, se irrita, chora?",
-      "Aceita ajuda? Sente vergonha de usar recursos na frente dos outros?",
-      "Como está o humor dela de modo geral?",
-      "Como vocês, família, estão lidando com tudo isso?"
-    ]},
-    {id:"I", title:"Objetivo", why:"Define o escopo da primeira versão.", qs:[
-      "Se o app desse certo, o que mudaria na vida dela e de vocês? Como seria um “deu certo” concreto?"
-    ]}
-  ];
-  var KEY = "avc-roteiro-v1";
-  var state = {meta:{}, answers:{}};
-
-  function load(){
-    try{ var raw = localStorage.getItem(KEY); if(raw){ var d = JSON.parse(raw); state.meta = d.meta||{}; state.answers = d.answers||{}; } }catch(e){}
-  }
-  var saveTimer;
-  function save(){
-    try{ localStorage.setItem(KEY, JSON.stringify(state)); flash("Salvo neste navegador."); }catch(e){ flash("Não foi possível salvar aqui — use Exportar."); }
-  }
-  function flash(t){ var el = document.getElementById("savedMsg"); el.textContent = t; clearTimeout(saveTimer); saveTimer = setTimeout(function(){ el.textContent=""; }, 2500); }
-
-  var total = 0;
-  function render(){
-    var host = document.getElementById("blocks"); host.innerHTML = "";
-    var n = 0; total = 0;
-    BLOCKS.forEach(function(b, bi){
-      var det = document.createElement("details"); det.className = "block"; if(bi===0) det.open = true;
-      var sum = document.createElement("summary");
-      sum.innerHTML = '<span class="letter">'+b.id+'</span><span>'+b.title+'</span><span class="count" data-count="'+b.id+'"></span>';
-      det.appendChild(sum);
-      var body = document.createElement("div"); body.className = "block-body";
-      var why = document.createElement("p"); why.className = "block-why"; why.textContent = "Por que perguntar: " + b.why; body.appendChild(why);
-      b.qs.forEach(function(q, qi){
-        n++; total++;
-        var id = b.id + (qi+1);
-        var wrap = document.createElement("div"); wrap.className = "q";
-        var lab = document.createElement("label"); lab.setAttribute("for","q-"+id);
-        lab.innerHTML = '<span class="num">'+n+'.</span>';
-        lab.appendChild(document.createTextNode(q));
-        var ta = document.createElement("textarea"); ta.id = "q-"+id; ta.dataset.qid = id;
-        ta.value = state.answers[id] || "";
-        ta.addEventListener("input", function(){ state.answers[id] = ta.value; updateProgress(); save(); });
-        wrap.appendChild(lab); wrap.appendChild(ta); body.appendChild(wrap);
-      });
-      det.appendChild(body); host.appendChild(det);
-    });
-    ["nome","quem","data"].forEach(function(k){
-      var el = document.getElementById("meta-"+k); el.value = state.meta[k] || "";
-      el.oninput = function(){ state.meta[k] = el.value; save(); };
-    });
-    updateProgress();
-  }
-  function filled(id){ return (state.answers[id]||"").trim().length > 0; }
-  function updateProgress(){
-    var done = 0;
-    BLOCKS.forEach(function(b){
-      var c = 0; b.qs.forEach(function(_, qi){ if(filled(b.id+(qi+1))) c++; });
-      done += c;
-      var el = document.querySelector('[data-count="'+b.id+'"]'); if(el) el.textContent = c + "/" + b.qs.length;
-    });
-    document.getElementById("progressBar").style.width = (total ? (done/total*100) : 0) + "%";
-    document.getElementById("progressLabel").textContent = done + " de " + total + " perguntas respondidas";
-  }
-
-  function download(name, text, type){
-    var blob = new Blob([text], {type:type}); var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
-  }
-  function slug(){ return (state.meta.nome||"entrevista").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "entrevista"; }
-  function toMarkdown(){
-    var L = ["# Entrevista com a família — comunicação pós-AVC",""];
-    L.push("- **Família / pessoa:** " + (state.meta.nome||""));
-    L.push("- **Quem respondeu:** " + (state.meta.quem||""));
-    L.push("- **Data:** " + (state.meta.data||""), "");
-    var n = 0;
-    BLOCKS.forEach(function(b){
-      L.push("## " + b.id + ". " + b.title, "");
-      b.qs.forEach(function(q, qi){ n++; var a = (state.answers[b.id+(qi+1)]||"").trim();
-        L.push("**" + n + ". " + q + "**", "", a ? a : "_(sem resposta)_", ""); });
-    });
-    return L.join("\n");
-  }
-
-  document.getElementById("btnMd").onclick = function(){ download(slug()+".md", toMarkdown(), "text/markdown;charset=utf-8"); };
-  document.getElementById("btnJson").onclick = function(){ download(slug()+".json", JSON.stringify(state,null,2), "application/json"); };
-  document.getElementById("fileImport").onchange = function(e){
-    var f = e.target.files[0]; if(!f) return;
-    var r = new FileReader();
-    r.onload = function(){ try{ var d = JSON.parse(r.result); state.meta = d.meta||{}; state.answers = d.answers||{}; save(); render(); flash("Respostas importadas."); }catch(err){ flash("Arquivo inválido."); } };
-    r.readAsText(f); e.target.value = "";
+  var root=document.documentElement;
+  try{var t=localStorage.getItem("avc-theme");if(t)root.setAttribute("data-theme",t);}catch(e){}
+  document.getElementById("themeBtn").onclick=function(){
+    var cur=root.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+    var next=cur==="dark"?"light":"dark";root.setAttribute("data-theme",next);
+    try{localStorage.setItem("avc-theme",next);}catch(e){}
   };
-  document.getElementById("btnExpand").onclick = function(){
-    var all = document.querySelectorAll("details.block"); var anyClosed = Array.prototype.some.call(all, function(d){ return !d.open; });
-    all.forEach(function(d){ d.open = anyClosed; }); this.textContent = anyClosed ? "Fechar todos" : "Abrir todos";
-  };
-  document.getElementById("btnPrint").onclick = function(){ document.querySelectorAll("details.block").forEach(function(d){ d.open = true; }); window.print(); };
-  document.getElementById("btnClear").onclick = function(){
-    if(!confirm("Apagar todas as respostas deste navegador? Exporte antes se quiser guardar.")) return;
-    state = {meta:{}, answers:{}}; try{ localStorage.removeItem(KEY); }catch(e){} render(); flash("Respostas apagadas.");
-  };
-
-  // tema
-  var root = document.documentElement;
-  try{ var t = localStorage.getItem("avc-theme"); if(t) root.setAttribute("data-theme", t); }catch(e){}
-  document.getElementById("themeBtn").onclick = function(){
-    var cur = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    var next = cur === "dark" ? "light" : "dark"; root.setAttribute("data-theme", next);
-    try{ localStorage.setItem("avc-theme", next); }catch(e){}
-  };
-
-  load(); render();
 })();
 </script>
 </body>

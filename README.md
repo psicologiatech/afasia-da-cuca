@@ -2,14 +2,17 @@
 
 Pesquisa de base e roteiro de entrevista com a família para desenhar um app de comunicação alternativa pós-AVC.
 
-Página única, sem dependências de build: tudo está em `index.html`.
+Site estático, sem etapa de build:
+
+- `index.html` — a pesquisa (o que o AVC causa, o que existe, lições de design, respostas → arquitetura)
+- `roteiro.html` — o roteiro de entrevista preenchível
+- `estilo.css` — visual compartilhado pelas duas páginas
 
 ## Publicar no GitHub Pages
 
-1. Crie um repositório e envie o `index.html` (e este README) para a branch `main`.
-2. No repositório: **Settings → Pages → Build and deployment**.
-3. Em *Source*, escolha **Deploy from a branch**, branch `main`, pasta `/ (root)`, e salve.
-4. Em alguns minutos a página fica disponível em https://psicologiatech.github.io/conversa-apoiada/.
+1. No repositório: **Settings → Pages → Build and deployment**.
+2. Em *Source*, escolha **Deploy from a branch**, branch `main`, pasta `/ (root)`, e salve.
+3. Em alguns minutos a página fica disponível em https://psicologiatech.github.io/conversa-apoiada/.
 
 ## Privacidade do roteiro
 
