@@ -21,6 +21,7 @@ Arquivos de apoio: `estilo.css` (visual), `config.js` (URL do script da planilha
   - Quem escolhe “convivo, mas outra pessoa acompanha mais” vê a Parte 2 primeiro e a Parte 1 como opcional.
 - **Rascunho no aparelho:** as respostas ficam salvas no navegador até serem enviadas. Enviar de novo atualiza a mesma linha.
 - **Consentimento** é obrigatório para enviar.
+- **A família vê o que já foi respondido:** ao abrir o link, cada pergunta mostra as respostas dos outros familiares (com nome e relação) e um campo para complementar. O bloco **H · Como é para você** é privado: só aparece na planilha.
 
 ## Planilha Google
 
@@ -38,7 +39,7 @@ Para instalar ou atualizar o script:
 
 As respostas envolvem dados de saúde (dados sensíveis pela LGPD).
 
-- O script **só grava** e nunca devolve respostas: quem tiver o URL não lê a planilha.
+- Sem um código de família válido, o script não devolve nada. Com o código, devolve só as respostas daquela família, **sem o bloco H**.
 - Respostas só são aceitas com um **código de convite válido**; convites só são criados com o **código de acesso**, que não fica no site.
 - Mantenha a planilha **privada** (sem compartilhamento por link).
 - Não faça commit de respostas exportadas: o repositório é público.

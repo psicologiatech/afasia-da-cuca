@@ -115,3 +115,11 @@ ol.sources li{margin-bottom:.35em}
 .thanks.show{display:block}
 .hidden{display:none!important}
 .optional-note{font-size:.9rem;color:var(--muted);font-weight:400;font-family:"Atkinson Hyperlegible",sans-serif}
+
+/* Respostas da família */
+.others{display:grid;gap:6px;margin:4px 0 8px}
+.other{background:var(--surface-2);border-left:3px solid var(--accent);padding:8px 12px;border-radius:0 8px 8px 0;font-size:.97rem;white-space:pre-wrap}
+.other b{display:block;font-size:.82rem;color:var(--muted);font-weight:700;white-space:normal}
+.private-note{font-size:.9rem;color:var(--warm);font-weight:700;margin:-4px 0 12px}
+.family-box{margin-top:16px}
+.family-box ul{margin:6px 0 0;padding-left:1.2em}

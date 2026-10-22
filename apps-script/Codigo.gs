@@ -1,9 +1,12 @@
 /**
  * Conversa Apoiada — script da planilha "Conversa Apoiada — Entrevistas".
  *
- * Faz duas coisas:
+ * Faz três coisas:
  *  - acao "convite": cria um código para uma família (só com o seu CODIGO de acesso);
- *  - acao "enviar": grava as respostas de um familiar, desde que o código da família exista.
+ *  - acao "enviar": grava as respostas de um familiar, desde que o código da família exista;
+ *  - acao "listar": devolve, a quem tem o link da família, o que os familiares já
+ *    responderam, para que vejam e complementem. Os temas em TEMAS_PRIVADOS
+ *    (bloco H, "Como é para você") nunca são devolvidos: só aparecem na planilha.
  *
  * Cada familiar que responde vira UMA linha na aba "Respostas".
  * Se a mesma pessoa enviar de novo (mesmo aparelho), a linha dela é atualizada.
@@ -19,12 +22,14 @@
  * Ao mudar o script depois: Implantar → Gerenciar implantações → editar (lápis)
  * → Versão: Nova versão → Implantar. Assim o URL continua o mesmo.
  *
- * O script nunca devolve respostas: quem tiver o URL não consegue ler a planilha.
+ * Sem o código de uma família, nada é devolvido. Com ele, só as respostas daquela
+ * família (sem os temas privados).
  */
 
 var ABA_FAMILIAS = 'Famílias';
 var ABA_RESPOSTAS = 'Respostas';
 var CAB_FAMILIAS = ['codigo_familia', 'familia', 'criado_em'];
+var TEMAS_PRIVADOS = ['H'];
 var CAB_FIXO = ['id_resposta', 'codigo_familia', 'familia', 'enviado_em', 'respondente', 'relacao', 'papel', 'consentimento'];
 
 function doPost(e) {
@@ -32,6 +37,7 @@ function doPost(e) {
     var dados = JSON.parse(e.postData.contents);
     if (dados.acao === 'convite') return criarConvite(dados);
     if (dados.acao === 'enviar') return gravarResposta(dados);
+    if (dados.acao === 'listar') return listarFamilia(dados);
     return resposta({ ok: false, erro: 'Ação desconhecida.' });
   } catch (err) {
     return resposta({ ok: false, erro: 'Erro no script: ' + err.message });
@@ -104,6 +110,37 @@ function gravarResposta(dados) {
   } finally {
     trava.releaseLock();
   }
+}
+
+function listarFamilia(dados) {
+  var familia = dados.token ? buscarFamilia(dados.token) : null;
+  if (familia === null) return resposta({ ok: false, erro: 'Este link de convite não é válido.' });
+  var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_RESPOSTAS);
+  var lista = [];
+  if (aba && aba.getLastRow() > 1) {
+    var tudo = aba.getRange(1, 1, aba.getLastRow(), aba.getLastColumn()).getValues();
+    var cab = tudo[0];
+    for (var i = 1; i < tudo.length; i++) {
+      var l = tudo[i];
+      if (l[1] !== dados.token) continue;
+      var respostas = {};
+      for (var j = CAB_FIXO.length; j < cab.length; j++) {
+        var qid = String(cab[j]).split(' — ')[0];
+        if (TEMAS_PRIVADOS.indexOf(qid.charAt(0)) >= 0) continue;
+        var v = l[j] === null || l[j] === undefined ? '' : String(l[j]).trim();
+        if (v) respostas[qid] = v;
+      }
+      lista.push({
+        id: l[0],
+        nome: String(l[4] || ''),
+        relacao: String(l[5] || ''),
+        papel: String(l[6] || ''),
+        enviado_em: l[3] instanceof Date ? l[3].toISOString() : String(l[3] || ''),
+        respostas: respostas
+      });
+    }
+  }
+  return resposta({ ok: true, familia: familia, respostas: lista });
 }
 
 function buscarFamilia(token) {

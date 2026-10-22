@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=3">
+<link rel="stylesheet" href="estilo.css?v=4">
 <script src="config.js?v=3"></script>
 </head>
 <body>
@@ -47,13 +47,14 @@
     <div class="grid c3">
       <div class="card"><h3>Leva uns 15 a 25 minutos</h3><p>Pode parar e continuar depois, neste mesmo aparelho. O que você escrever fica guardado aqui enquanto isso.</p></div>
       <div class="card"><h3>Não existe resposta certa</h3><p>Escreva do seu jeito. Pode deixar perguntas em branco. Se não souber, tudo bem.</p></div>
-      <div class="card"><h3>Mais de uma pessoa pode responder</h3><p>Cada familiar usa o mesmo link no próprio celular. Ninguém precisa repetir o que outra pessoa já contou.</p></div>
+      <div class="card"><h3>A família responde junto</h3><p>Cada familiar usa o mesmo link. Você vê o que os outros já contaram e pode complementar — ninguém precisa repetir.</p></div>
     </div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
+    <div id="familyBox" class="callout family-box hidden" aria-live="polite"></div>
     <h2>Sobre você</h2>
     <div class="meta-fields">
       <label class="field"><span>Seu nome (ou como prefere ser chamado/a)</span><input type="text" id="r-nome" autocomplete="given-name"></label>
@@ -66,6 +67,7 @@
       <label><input type="radio" name="papel" value="principal"><span><strong>Sou quem mais acompanha o dia a dia de <span class="pn">a pessoa</span>.</strong><small>Você responde as duas partes: o dia a dia e o seu olhar.</small></span></label>
       <label><input type="radio" name="papel" value="complementar"><span><strong>Convivo com <span class="pn">a pessoa</span>, mas outra pessoa da família acompanha mais o dia a dia.</strong><small>Você responde só a parte do seu olhar. A parte do dia a dia fica opcional, se quiser acrescentar algo.</small></span></label>
     </div>
+    <p class="part-sub" id="papelHint"></p>
   </div>
 </section>
 
@@ -78,7 +80,7 @@
     <div class="send-bar">
       <label class="consent">
         <input type="checkbox" id="consent">
-        <span>Concordo que minhas respostas sejam guardadas e usadas para planejar o aplicativo. Sei que a participação é voluntária e que posso pedir para apagar minhas respostas a qualquer momento. <a href="index.html#privacidade" target="_blank" rel="noopener">Como os dados são cuidados</a></span>
+        <span>Concordo que minhas respostas sejam guardadas e usadas para planejar o aplicativo, e sei que os familiares com este link poderão ler o que escrevi (menos o tema “Como é para você”, que só a equipe vê). Sei que a participação é voluntária e que posso pedir para apagar minhas respostas a qualquer momento. <a href="index.html#privacidade" target="_blank" rel="noopener">Como os dados são cuidados</a></span>
       </label>
       <div class="toolbar" style="margin-top:0">
         <button type="button" class="primary" id="btnSend">Enviar respostas</button>
@@ -157,7 +159,7 @@
         "{p} tem expressões típicas, um jeito próprio de brincar? Conte algumas.",
         "Sobre o que você acha que {p} gostaria de conversar e hoje não consegue?"
       ]},
-      {id:"H", titulo:"Como é para você", porque:"Ajuda a pensar como o aplicativo pode apoiar também quem conversa com {p}.", qs:[
+      {id:"H", privado:true, titulo:"Como é para você", porque:"Ajuda a pensar como o aplicativo pode apoiar também quem conversa com {p}.", qs:[
         "Quando {p} não consegue se fazer entender com você, como reage?",
         "{p} aceita ajuda? Parece sentir vergonha de usar recursos na frente dos outros?",
         "Como você vê o humor de {p} de modo geral?",
@@ -182,6 +184,45 @@
   function novoId(){ try{ return crypto.randomUUID(); }catch(e){ return "r-" + Date.now().toString(36) + Math.random().toString(36).slice(2,8); } }
   var state = {id:novoId(), r:{nome:"", relacao:"", pessoa:"", papel:""}, answers:{}, consent:false, enviadoEm:null, pendente:false};
   try{ var raw = localStorage.getItem(KEY); if(raw){ var d = JSON.parse(raw); for (var k in d) state[k] = d[k]; } }catch(e){}
+
+  var familia = {carregado:false, erro:"", respostas:[]};
+  function outros(){ return familia.respostas.filter(function(r){ return r.id !== state.id; }); }
+  function limpaRelacao(t){ return String(t || "").replace(/\s*\(pessoa:[^)]*\)\s*$/, "").trim(); }
+  function quem(r){ var rel = limpaRelacao(r.relacao); return r.nome + (rel ? " (" + rel + ")" : ""); }
+  function respostasDeOutros(qid){ return outros().filter(function(r){ return r.respostas[qid]; }); }
+
+  function carregarFamilia(){
+    if (!TOKEN || !CFG.scriptUrl) return;
+    fetch(CFG.scriptUrl, {method:"POST", body:JSON.stringify({acao:"listar", token:TOKEN})})
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (!res.ok) throw new Error(res.erro || "");
+        familia = {carregado:true, erro:"", respostas:res.respostas || []};
+        if (!state.r.pessoa){
+          var achou = familia.respostas.map(function(r){ var m = /\(pessoa:\s*([^)]*)\)/.exec(r.relacao); return m && m[1].trim(); }).filter(Boolean)[0];
+          if (achou){ state.r.pessoa = achou; document.getElementById("r-pessoa").value = achou; save(); }
+        }
+        mostrarFamilia(); render();
+      })
+      .catch(function(err){ familia.erro = err.message || "sem conexão"; mostrarFamilia(); });
+  }
+  function mostrarFamilia(){
+    var box = document.getElementById("familyBox"), lista = outros();
+    if (familia.erro){ box.classList.remove("hidden"); box.textContent = "Não foi possível carregar o que a família já respondeu (" + familia.erro + "). Você pode responder normalmente."; return; }
+    if (!familia.carregado || !lista.length){ box.classList.add("hidden"); document.getElementById("papelHint").textContent = ""; return; }
+    box.classList.remove("hidden"); box.innerHTML = "";
+    var t = document.createElement("strong"); t.textContent = "Quem da família já respondeu:"; box.appendChild(t);
+    var ul = document.createElement("ul");
+    lista.forEach(function(r){ var li = document.createElement("li"); li.textContent = quem(r) + (r.papel ? " — " + r.papel.toLowerCase() : ""); ul.appendChild(li); });
+    box.appendChild(ul);
+    var p = document.createElement("p"); p.style.margin = "8px 0 0";
+    p.textContent = "As respostas aparecem embaixo de cada pergunta. Você pode complementar, contar de outro jeito ou deixar em branco.";
+    box.appendChild(p);
+    var principais = lista.filter(function(r){ return /dia a dia/i.test(r.papel); });
+    document.getElementById("papelHint").textContent = principais.length
+      ? principais.map(quem).join(", ") + " já respondeu a parte do dia a dia. Se escolher a primeira opção, você verá essas respostas e pode complementar."
+      : "";
+  }
 
   var flashTimer;
   function flash(t){ var el = document.getElementById("savedMsg"); el.textContent = t; clearTimeout(flashTimer); flashTimer = setTimeout(function(){ el.textContent = ""; }, t.length > 40 ? 9000 : 2500); }
@@ -223,6 +264,7 @@
         det.appendChild(sum);
         var body = document.createElement("div"); body.className = "block-body";
         var why = document.createElement("p"); why.className = "block-why"; why.textContent = "Por que perguntamos: " + txt(b.porque); body.appendChild(why);
+        if (b.privado){ var pv = document.createElement("p"); pv.className = "private-note"; pv.textContent = "🔒 Só a equipe do projeto lê as respostas deste tema. Os outros familiares não veem."; body.appendChild(pv); }
         b.qs.forEach(function(q, qi){
           n++;
           var id = b.id + (qi + 1);
@@ -230,10 +272,23 @@
           var lab = document.createElement("label"); lab.setAttribute("for", "q-" + id);
           lab.innerHTML = '<span class="num">' + n + '.</span>';
           lab.appendChild(document.createTextNode(txt(q)));
+          var ja = b.privado ? [] : respostasDeOutros(id);
           var ta = document.createElement("textarea"); ta.id = "q-" + id;
           ta.value = state.answers[id] || "";
+          wrap.appendChild(lab);
+          if (ja.length){
+            var box = document.createElement("div"); box.className = "others";
+            ja.forEach(function(r){
+              var o = document.createElement("div"); o.className = "other";
+              var who = document.createElement("b"); who.textContent = quem(r) + " respondeu:";
+              o.appendChild(who); o.appendChild(document.createTextNode(r.respostas[id]));
+              box.appendChild(o);
+            });
+            wrap.appendChild(box);
+            ta.placeholder = "Quer complementar ou contar de outro jeito? (opcional)";
+          }
           ta.addEventListener("input", function(){ state.answers[id] = ta.value; state.pendente = true; save(); progresso(); });
-          wrap.appendChild(lab); wrap.appendChild(ta); body.appendChild(wrap);
+          wrap.appendChild(ta); body.appendChild(wrap);
         });
         det.appendChild(body); host.appendChild(det);
       });
@@ -241,7 +296,7 @@
     progresso();
   }
 
-  function preenchida(id){ return (state.answers[id] || "").trim().length > 0; }
+  function preenchida(id){ return (state.answers[id] || "").trim().length > 0 || respostasDeOutros(id).length > 0; }
   function progresso(){
     var total = 0, feitas = 0;
     PARTES.forEach(function(p){ p.blocos.forEach(function(b){
@@ -250,7 +305,7 @@
       if (blocosVisiveis.indexOf(b) >= 0){ total += b.qs.length; feitas += c; }
     }); });
     document.getElementById("progressBar").style.width = (total ? feitas / total * 100 : 0) + "%";
-    document.getElementById("progressLabel").textContent = feitas + " de " + total + " perguntas respondidas" + (state.r.papel === "complementar" ? " (sem contar as opcionais)" : "");
+    document.getElementById("progressLabel").textContent = feitas + " de " + total + " perguntas já têm resposta" + (outros().length ? " da família" : "") + (state.r.papel === "complementar" ? " (sem contar as opcionais)" : "");
     mostrarEnvio();
   }
   function mostrarEnvio(){
@@ -294,6 +349,7 @@
         if (!res.ok) throw new Error(res.erro || "Falha no envio.");
         state.enviadoEm = new Date().toISOString(); state.pendente = false; save(); mostrarEnvio();
         flash(res.atualizado ? "✓ Respostas atualizadas." : "✓ Respostas enviadas.");
+        carregarFamilia();
       })
       .catch(function(err){ flash("Não foi possível enviar agora: " + err.message + " Suas respostas continuam guardadas neste aparelho; tente de novo mais tarde."); })
       .then(function(){ btn.disabled = false; btn.textContent = "Enviar respostas"; });
@@ -323,6 +379,7 @@
   };
 
   render();
+  carregarFamilia();
 })();
 </script>
 </body>
