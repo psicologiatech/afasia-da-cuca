@@ -68,7 +68,7 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,a:focus-visible{
 .meta-fields{display:grid;gap:12px;margin:16px 0}
 @media(min-width:720px){.meta-fields{grid-template-columns:repeat(3,1fr)}}
 label.field span{display:block;font-size:.9rem;font-weight:700;margin-bottom:4px}
-input[type=text],input[type=date],textarea{width:100%;font:inherit;font-size:1rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+input[type=text],input[type=password],input[type=date],textarea{width:100%;font:inherit;font-size:1rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 textarea{min-height:76px;resize:vertical}
 .progress{height:10px;background:var(--surface-2);border-radius:999px;overflow:hidden;margin:8px 0 4px}
 .progress > div{height:100%;width:0;background:var(--accent);transition:width .3s}
