@@ -98,3 +98,20 @@ ol.sources li{margin-bottom:.35em}
   .card{box-shadow:none}
   textarea{border:1px solid #999;min-height:60px}
 }
+
+/* Entrevista */
+.part-title{margin:36px 0 4px}
+.part-sub{color:var(--muted);margin-bottom:12px}
+.choice{display:grid;gap:10px;margin:12px 0}
+.choice label{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:2px solid var(--line);border-radius:var(--radius);padding:14px 16px;cursor:pointer}
+.choice label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.choice input{margin-top:5px;width:20px;height:20px;accent-color:var(--accent);flex:none}
+.choice small{display:block;color:var(--muted);font-size:.9rem}
+.consent{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:16px 0}
+.consent input{width:22px;height:22px;margin-top:3px;accent-color:var(--accent);flex:none}
+.send-bar{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-top:24px;box-shadow:var(--shadow)}
+.send-bar button.primary{font-size:1.05rem;padding:14px 22px}
+.thanks{display:none}
+.thanks.show{display:block}
+.hidden{display:none!important}
+.optional-note{font-size:.9rem;color:var(--muted);font-weight:400;font-family:"Atkinson Hyperlegible",sans-serif}

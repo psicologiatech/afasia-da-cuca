@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pesquisa de Base</title>
+<meta name="description" content="Pesquisa de base para desenhar um app de comunicação alternativa pós-AVC.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Conversa Apoiada · Material da equipe</span>
+    <h1>Pesquisa de base</h1>
+    <p class="lede">O que o AVC pode causar na comunicação, o que já existe para ajudar (dentro e fora da tecnologia) e como as respostas da família vão orientar a arquitetura do app. Os convites para a entrevista são gerados na <a href="convite.html">página de convites</a>.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Seções">
+  <div class="wrap">
+    <a href="#efeitos">O que o AVC causa</a>
+    <a href="#existe">O que já existe</a>
+    <a href="#licoes">Lições para o design</a>
+    <a href="convite.html"><strong>Convites →</strong></a>
+    <a href="#arquitetura">Respostas → arquitetura</a>
+    <a href="#fontes">Fontes</a>
+    <button class="theme-btn" type="button" id="themeBtn" aria-label="Alternar tema claro ou escuro">◐ Tema</button>
+  </div>
+</nav>
+
+<main>
+
+<section id="efeitos">
+  <div class="wrap">
+    <h2>1. O que o AVC pode causar na comunicação</h2>
+    <p>Três quadros aparecem com frequência. Podem vir juntos ou separados, e cada um pede uma solução diferente — por isso o app precisa saber <em>qual</em> é o caso antes de decidir como funciona.</p>
+    <div class="grid c3">
+      <article class="card">
+        <span class="tag lang">Linguagem</span>
+        <h3>Afasia</h3>
+        <p>Atinge a própria linguagem: encontrar palavras, montar frases e, em muitos casos, compreender. Pode afetar também leitura, escrita, cálculo e gestos.</p>
+        <ul class="clean">
+          <li><strong>Expressiva (tipo Broca):</strong> entende, mas a fala não sai ou sai “telegráfica”.</li>
+          <li><strong>Receptiva (tipo Wernicke):</strong> fala fluente, mas sem sentido, e compreensão comprometida.</li>
+          <li><strong>Global:</strong> fala e compreensão muito afetadas.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <span class="tag motor">Motor</span>
+        <h3>Disartria</h3>
+        <p>A linguagem está preservada; o problema é a execução. Músculos de lábios, língua, palato, voz e respiração ficam fracos, lentos ou descoordenados. A fala sai arrastada, baixa, rouca ou anasalada.</p>
+        <p class="tool-type">A pessoa sabe exatamente o que quer dizer — muitas vezes consegue escrever ou digitar.</p>
+      </article>
+      <article class="card">
+        <span class="tag plan">Planejamento</span>
+        <h3>Apraxia de fala</h3>
+        <p>Os músculos funcionam e a pessoa sabe a palavra, mas o cérebro não consegue programar a sequência de movimentos para produzi-la. Costuma acompanhar a afasia expressiva.</p>
+        <p class="tool-type">Frases automáticas (“bom dia”, cantar) às vezes saem melhor que fala voluntária.</p>
+      </article>
+    </div>
+
+    <div class="grid c3" style="margin-top:20px">
+      <div class="card"><div class="stat">42%</div><div class="stat-label">tiveram disartria após o primeiro AVC (estudo com pacientes brasileiros)</div></div>
+      <div class="card"><div class="stat">30%</div><div class="stat-label">tiveram afasia no mesmo estudo; 10% tinham disfagia, disartria e afasia juntas</div></div>
+      <div class="card"><div class="stat">12 meses</div><div class="stat-label">tempo médio de fonoterapia num serviço público brasileiro — mais longo com afasia ou apraxia</div></div>
+    </div>
+
+    <div class="callout warm">
+      <p><strong>Outras sequelas que pesam no desenho do app:</strong> paralisia ou fraqueza de um lado do corpo (muitas vezes a pessoa passa a usar a mão não dominante), perda de parte do campo visual ou negligência de um lado, fadiga, dificuldades de atenção e memória, e depressão pós-AVC — que afeta diretamente a vontade de usar qualquer ferramenta.</p>
+    </div>
+  </div>
+</section>
+
+<section id="existe">
+  <div class="wrap">
+    <h2>2. O que já existe</h2>
+    <h3>Abordagens humanas e comunitárias</h3>
+    <div class="grid c2">
+      <article class="card">
+        <h3>Fonoaudiologia</h3>
+        <p>Eixo central da reabilitação. Avalia o quadro, trabalha a recuperação e indica recursos de comunicação alternativa. O app deve ser pensado <strong>junto</strong> com a fono, nunca no lugar dela.</p>
+      </article>
+      <article class="card">
+        <h3>Treino do parceiro de comunicação</h3>
+        <p>O método mais conhecido é a <em>Supported Conversation for Adults with Aphasia</em> (SCA), do Aphasia Institute (Canadá). O foco é ensinar quem convive a apoiar a conversa, partindo da ideia de que a pessoa com afasia é competente e sabe mais do que consegue dizer.</p>
+        <p>Estratégias: escrever palavras-chave, usar gestos e desenhos, perguntas de sim/não, checar o entendimento e registrar a conversa por escrito. Em estudo controlado, o treino de parceiros melhorou a participação das pessoas com afasia mesmo sem elas terem sido treinadas.</p>
+      </article>
+      <article class="card">
+        <h3>Grupos de convivência</h3>
+        <p>Tradição forte no Brasil: o Centro de Convivência de Afásicos da Unicamp (desde 1989), grupos interdisciplinares na UFSM e na UFPE, e até um projeto de palhaçaria com pessoas com afasia na UFRGS. Combatem o isolamento, que é uma das consequências mais duras da afasia.</p>
+      </article>
+      <article class="card">
+        <h3>Comunicação alternativa de baixa tecnologia</h3>
+        <p>Pranchas de comunicação, álbuns com pictogramas, fotografias da vida da pessoa, caderno de conversa. Pesquisas brasileiras mostram que álbuns de comunicação ajudaram na comunicação funcional e até na recuperação de leitura e nomeação; e que fotografias colocam a pessoa como quem <em>conduz</em> a conversa, não só como quem responde.</p>
+      </article>
+    </div>
+
+    <h3 style="margin-top:32px">Tecnologia</h3>
+    <p>Existem dois tipos bem diferentes — e vale não misturar os dois no planejamento:</p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th>Solução</th><th>Tipo</th><th>Observações</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tactus Therapy</strong></td><td class="tool-type">Terapia (reabilitar)</td><td>Apps desenhados por fonoaudióloga, compra única, funcionam offline. Pesquisa independente mostrou melhora com 20 min/dia por 4 semanas em afasia crônica. Em inglês.</td></tr>
+        <tr><td><strong>TalkPath (Lingraphica)</strong></td><td class="tool-type">Terapia</td><td>Milhares de exercícios de fala, linguagem e cognição, e um noticiário adaptado. Em inglês.</td></tr>
+        <tr><td><strong>Constant Therapy</strong></td><td class="tool-type">Terapia</td><td>Exercícios diários em casa entre as sessões. Em inglês.</td></tr>
+        <tr><td><strong>Livox</strong></td><td class="tool-type">Comunicação alternativa</td><td>Brasileiro, premiado internacionalmente. Corrige toques imprecisos. Nasceu e é mais usado com crianças.</td></tr>
+        <tr><td><strong>Look to Speak (Google)</strong></td><td class="tool-type">Comunicação alternativa</td><td>Gratuito, só Android. A pessoa seleciona frases com o olhar (esquerda, direita, cima) e o celular fala. Pensado para mensagens curtas onde outros aparelhos não chegam.</td></tr>
+        <tr><td><strong>Dispositivos Lingraphica</strong></td><td class="tool-type">Comunicação alternativa</td><td>Aparelhos dedicados para afasia, com vocabulário adulto. Caros e em inglês.</td></tr>
+        <tr><td><strong>Protótipos acadêmicos</strong></td><td class="tool-type">Comunicação alternativa</td><td>Ex.: TCC de Design da UFU propôs um vocalizador de beira de leito para necessidades básicas (frio, calor, sede, fome, dor) que avisa o cuidador.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout">
+      <p><strong>A lacuna:</strong> em português, há pouca coisa pensada especificamente para <em>adultos</em> com afasia — com vocabulário da vida adulta, identidade preservada e apoio ao parceiro de conversa.</p>
+    </div>
+  </div>
+</section>
+
+<section id="licoes">
+  <div class="wrap">
+    <h2>3. Lições da pesquisa para o design</h2>
+    <div class="grid c2">
+      <article class="card">
+        <h3>O maior risco é o abandono</h3>
+        <p>Os fatores mais ligados ao abandono são: o sistema não ser mantido nem ajustado, falta de treino, falta de suporte, atitude e má adequação à pessoa. Em lesão cerebral adquirida, o abandono acontece mais quando some quem facilitava o uso do que por rejeição ao produto.</p>
+      </article>
+      <article class="card">
+        <h3>Usar junto também é sucesso</h3>
+        <p>Para muitas pessoas com afasia, usar o recurso <em>com apoio de um parceiro</em> já é um bom resultado. O app deve ser desenhado para duas pessoas usando juntas — e introduzido cedo, não como último recurso.</p>
+      </article>
+      <article class="card">
+        <h3>Vocabulário pessoal, não genérico</h3>
+        <p>Pessoas com afasia tendem a levar mais tempo para aprender e generalizam menos para itens não treinados. Fotos reais, nomes da família e frases que a pessoa de fato usaria funcionam melhor que bancos de imagens genéricos.</p>
+      </article>
+      <article class="card">
+        <h3>Interface</h3>
+        <ul class="clean">
+          <li>Poucas opções por tela; uma tarefa por vez.</li>
+          <li>Alvos grandes, pensando em mão não dominante e tremor.</li>
+          <li>Imagem + palavra + voz juntas (multimodal).</li>
+          <li>Navegação previsível; nada que mude sozinho.</li>
+          <li>Desenhar <em>com</em> a pessoa, não só para ela.</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="arquitetura">
+  <div class="wrap">
+    <h2>4. Como as respostas viram arquitetura</h2>
+    <p>Cada bloco da entrevista alimenta uma decisão de design. A parte 1 (dia a dia, blocos A–F) é respondida por quem acompanha a rotina; a parte 2 (blocos G–I) por cada familiar.</p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th>O que a família responder</th><th>Decisão no app</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Entender e se expressar</strong> (blocos B e C)</td><td>Peso de imagem, texto e voz. Com compreensão comprometida: fotos reais e voz lendo cada botão. Com disartria pura: teclado com predição e voz sintetizada podem bastar.</td></tr>
+        <tr><td><strong>Corpo, visão e energia</strong> (bloco D)</td><td>Tamanho dos alvos, layout para mão esquerda, conteúdo concentrado no lado visual preservado, contraste. Se o toque for inviável: varredura ou seleção pelo olhar.</td></tr>
+        <tr><td><strong>Rotina e necessidades</strong> (bloco E)</td><td>Hierarquia de telas: urgências e corpo (dor, banheiro, sede) sempre a um toque; depois emoções, pedidos e conversa.</td></tr>
+        <tr><td><strong>Lembranças e jeito de ser</strong> (bloco G, um por familiar)</td><td>Editor do cuidador simples: fotos da família, frases pessoais, assuntos favoritos. É o que mantém o app vivo e evita o abandono.</td></tr>
+        <tr><td><strong>Celular e tecnologia</strong> (bloco F)</td><td>Plataforma (Android/iOS/web), funcionamento offline, quem administra o conteúdo, possível sincronização entre aparelho da pessoa e do cuidador.</td></tr>
+        <tr><td><strong>Como é para cada familiar</strong> (bloco H)</td><td>Modo parceiro: dicas de conversa apoiada na tela, registro da conversa, tom adulto e respeitoso, nada infantilizado.</td></tr>
+        <tr><td><strong>Objetivo</strong> (bloco I)</td><td>Escopo da primeira versão: resolver bem o “deu certo” que a família descreveu, antes de qualquer outra função.</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer id="fontes">
+  <div class="wrap">
+    <h2>Fontes</h2>
+    <ol class="sources">
+      <li><a href="https://repositorio.ufmg.br/items/838db20f-f5a9-4f28-82fd-034edb141e5f/full">Alterações de deglutição, motricidade orofacial e linguagem após AVC — UFMG</a></li>
+      <li><a href="https://scielo.br/j/dn/a/8v7RgNXPzcRd5GLZxKDmz9t/?lang=en">Transtornos neurológicos adquiridos da comunicação e tempo de terapia — SciELO</a></li>
+      <li><a href="https://bestpractice.bmj.com/topics/pt-br/973">Afasia, disartria e apraxia — BMJ Best Practice</a></li>
+      <li><a href="https://www.cuf.pt/mais-saude/o-que-e-disartria-e-como-afeta-fala">O que é a disartria — CUF</a></li>
+      <li><a href="https://www.aphasia.com/?p=4756">Supported Conversation for Adults with Aphasia — aphasia.com</a></li>
+      <li><a href="https://pubs.asha.org/doi/10.1044/1092-4388(2001/051)">Kagan et al. (2001), treino de parceiros com SCA — JSLHR/ASHA</a></li>
+      <li><a href="https://periodicos2.uesb.br/index.php/estudosdalinguagem/article/download/1067/916/1800">O Centro de Convivência de Afásicos em foco — UESB</a></li>
+      <li><a href="https://periodicos2.uesb.br/index.php/estudosdalinguagem/article/download/5296/3992/9449">Grupo Interdisciplinar de Convivência — UFSM</a></li>
+      <li><a href="https://seer.ufrgs.br/index.php/revext/article/download/156063/99620/710914">Palhaçaria com pessoas com afasia — UFRGS</a></li>
+      <li><a href="https://teses.usp.br/teses/disponiveis/25/25143/tde-12062012-155950/en.php">Intervenção nas afasias com comunicação suplementar e/ou alternativa — USP</a></li>
+      <li><a href="https://www.prp.unicamp.br/pibic/congressos/xviiicongresso/resumos/082827.pdf">A fotografia como mediadora de CSA com pessoas afásicas — Unicamp</a></li>
+      <li><a href="https://repositorio.ufu.br/handle/123456789/34956">Recurso de CSA no contexto domiciliar pós-AVC — UFU</a></li>
+      <li><a href="https://tactustherapy.com/">Tactus Therapy</a></li>
+      <li><a href="https://aphasia.org/aphasia-resources/aphasia-apps/">Aphasia apps — National Aphasia Association</a></li>
+      <li><a href="https://canaltech.com.br/saude/divtech-4-startups-do-brasil-que-usam-tecnologia-para-gerar-acessibilidade-107308/">Livox — Canaltech</a></li>
+      <li><a href="https://blog.google/outreach-initiatives/accessibility/look-to-speak/">Look to Speak — Google</a></li>
+      <li><a href="https://pubmed.ncbi.nlm.nih.gov/17114167">Fatores de sucesso e abandono de CAA — PubMed</a></li>
+      <li><a href="https://lingraphica.com/?p=6974">CAA de alta tecnologia na afasia pós-AVC — Lingraphica</a></li>
+      <li><a href="https://a11y-paradise.onrender.com/reviews/69b98ed7c9b53e8e42233bd8">Comic Spin: princípios de design para afasia</a></li>
+    </ol>
+    <p style="margin-top:24px">Material de apoio ao planejamento. Não substitui avaliação fonoaudiológica ou médica.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  try{var t=localStorage.getItem("avc-theme");if(t)root.setAttribute("data-theme",t);}catch(e){}
+  document.getElementById("themeBtn").onclick=function(){
+    var cur=root.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+    var next=cur==="dark"?"light":"dark";root.setAttribute("data-theme",next);
+    try{localStorage.setItem("avc-theme",next);}catch(e){}
+  };
+})();
+</script>
+</body>
+</html>

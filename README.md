@@ -1,39 +1,48 @@
-# Comunicação após o AVC
+# Conversa Apoiada
 
-Pesquisa de base e roteiro de entrevista com a família para desenhar um app de comunicação alternativa pós-AVC.
+Entrevista com famílias para desenhar um aplicativo de comunicação alternativa para pessoas que tiveram AVC. Site estático, sem etapa de build.
 
-Site estático, sem etapa de build:
+| Página | Para quem | O que é |
+|---|---|---|
+| `entrevista.html?c=CÓDIGO` | Famílias | A entrevista. Só abre com um link de convite. |
+| `index.html` | Famílias | Leitura opcional: o que muda na comunicação depois do AVC, dicas para conversar, onde buscar apoio e como os dados são cuidados. |
+| `convite.html` | Equipe | Gera um link de convite por família (pede o código de acesso). |
+| `pesquisa.html` | Equipe | Pesquisa de base: quadros, soluções existentes, lições de design, respostas → arquitetura. |
 
-- `index.html` — a pesquisa (o que o AVC causa, o que existe, lições de design, respostas → arquitetura)
-- `roteiro.html` — o roteiro de entrevista preenchível
-- `estilo.css` — visual compartilhado pelas duas páginas
-- `apps-script/Codigo.gs` — script que grava as entrevistas numa planilha Google
+Arquivos de apoio: `estilo.css` (visual), `config.js` (URL do script da planilha), `apps-script/Codigo.gs` (script da planilha).
 
-## Publicar no GitHub Pages
+## Como a entrevista funciona
 
-1. No repositório: **Settings → Pages → Build and deployment**.
-2. Em *Source*, escolha **Deploy from a branch**, branch `main`, pasta `/ (root)`, e salve.
-3. Em alguns minutos a página fica disponível em https://psicologiatech.github.io/conversa-apoiada/.
+- **Um link por família.** Todos os familiares usam o mesmo link, cada um no próprio aparelho.
+- **Cada pessoa vira uma linha** na aba *Respostas* da planilha, com o nome da família, o nome de quem respondeu e a relação com a pessoa.
+- **Duas partes:**
+  - *Parte 1 · O dia a dia* (blocos A–F): fatos sobre a pessoa. Responde quem mais acompanha a rotina.
+  - *Parte 2 · O seu olhar* (blocos G–I): lembranças, a relação e expectativas. Cada familiar responde.
+  - Quem escolhe “convivo, mas outra pessoa acompanha mais” vê a Parte 2 primeiro e a Parte 1 como opcional.
+- **Rascunho no aparelho:** as respostas ficam salvas no navegador até serem enviadas. Enviar de novo atualiza a mesma linha.
+- **Consentimento** é obrigatório para enviar.
 
-## Ligar o roteiro à planilha Google
+## Planilha Google
 
-As entrevistas vão para a planilha **Conversa Apoiada — Entrevistas**, no Google Drive da dona do projeto. Configuração, uma vez só:
+Planilha: **Conversa Apoiada — Entrevistas** (abas *Famílias* e *Respostas*, criadas pelo script).
 
-1. Abra a planilha → **Extensões → Apps Script**. Apague o que houver e cole o conteúdo de `apps-script/Codigo.gs`. Salve.
-2. Clique na engrenagem (**Configurações do projeto**) → **Propriedades do script** → **Adicionar propriedade**: nome `CODIGO`, valor = um código de acesso só seu. Salve.
-3. **Implantar → Nova implantação** → tipo **App da Web**. *Executar como:* Eu. *Quem pode acessar:* Qualquer pessoa. Implante e autorize o acesso à sua conta.
-4. Copie o **URL do app da Web** (termina em `/exec`).
-5. No `roteiro.html`, abra **Conexão com a planilha**, cole o URL e o código, e clique em **Salvar conexão**. Isso é feito uma vez em cada aparelho usado nas entrevistas.
+Para instalar ou atualizar o script:
 
-Se mudar o script depois, use **Implantar → Gerenciar implantações → editar → Nova versão**, para manter o mesmo URL.
+1. Na planilha: **Extensões → Apps Script**. Substitua o conteúdo por `apps-script/Codigo.gs` e salve.
+2. Na primeira vez: engrenagem (**Configurações do projeto**) → **Propriedades do script** → propriedade `CODIGO` com o seu código de acesso.
+3. Primeira implantação: **Implantar → Nova implantação** → **App da Web**, *Executar como:* Eu, *Quem pode acessar:* Qualquer pessoa.
+   Atualizações: **Implantar → Gerenciar implantações** → lápis → *Versão:* **Nova versão** → Implantar. Assim o URL não muda.
+4. O URL do app da Web fica em `config.js`.
 
 ## Privacidade
 
-As respostas envolvem dados de saúde (dados sensíveis pela LGPD). Por isso:
+As respostas envolvem dados de saúde (dados sensíveis pela LGPD).
 
-- **O URL do script e o código não ficam no site.** Eles são digitados em cada aparelho e guardados só nele.
-- **O script só grava; nunca devolve dados.** Quem descobrir o URL não consegue ler a planilha, e sem o código não consegue gravar.
-- **Até ser enviada, a entrevista existe só no navegador** de quem preencheu. Enviar de novo atualiza a mesma linha da planilha.
-- **Mantenha a planilha privada.** Não compartilhe por link aberto.
-- **Peça consentimento** à família antes de registrar, explicando para que as respostas serão usadas.
-- **Não faça commit** de arquivos exportados (.md/.json) com respostas: o repositório é público.
+- O script **só grava** e nunca devolve respostas: quem tiver o URL não lê a planilha.
+- Respostas só são aceitas com um **código de convite válido**; convites só são criados com o **código de acesso**, que não fica no site.
+- Mantenha a planilha **privada** (sem compartilhamento por link).
+- Não faça commit de respostas exportadas: o repositório é público.
+
+## Publicar no GitHub Pages
+
+**Settings → Pages** → *Deploy from a branch* → `main`, pasta `/ (root)`. Endereço: https://psicologiatech.github.io/conversa-apoiada/

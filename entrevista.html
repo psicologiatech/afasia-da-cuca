@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Conversa Apoiada</title>
+<meta name="description" content="Entrevista com a família para desenhar um aplicativo de comunicação após o AVC.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<script src="config.js"></script>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Conversa Apoiada</span>
+    <h1>Queremos ouvir você</h1>
+    <p class="lede">Estamos criando um aplicativo para ajudar quem teve um AVC a se comunicar com a família. Para que ele sirva de verdade, precisamos conhecer a pessoa, a rotina de vocês e o que hoje é difícil. Ninguém conhece isso melhor do que a família.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Navegação">
+  <div class="wrap">
+    <a href="index.html" target="_blank" rel="noopener">Quer entender mais? Leia aqui ↗</a>
+    <button class="theme-btn" type="button" id="themeBtn" aria-label="Alternar tema claro ou escuro">◐ Tema</button>
+  </div>
+</nav>
+
+<main>
+
+<section id="semConvite" class="hidden">
+  <div class="wrap">
+    <div class="callout warm">
+      <p><strong>Esta entrevista é aberta por um link de convite.</strong> Se você recebeu um link, abra-o diretamente. Se não, peça o link a quem convidou você.</p>
+    </div>
+    <p><a href="index.html">Ler sobre comunicação após o AVC →</a></p>
+  </div>
+</section>
+
+<div id="app">
+
+<section>
+  <div class="wrap">
+    <div class="grid c3">
+      <div class="card"><h3>Leva uns 15 a 25 minutos</h3><p>Pode parar e continuar depois, neste mesmo aparelho. O que você escrever fica guardado aqui enquanto isso.</p></div>
+      <div class="card"><h3>Não existe resposta certa</h3><p>Escreva do seu jeito. Pode deixar perguntas em branco. Se não souber, tudo bem.</p></div>
+      <div class="card"><h3>Mais de uma pessoa pode responder</h3><p>Cada familiar usa o mesmo link no próprio celular. Ninguém precisa repetir o que outra pessoa já contou.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Sobre você</h2>
+    <div class="meta-fields">
+      <label class="field"><span>Seu nome (ou como prefere ser chamado/a)</span><input type="text" id="r-nome" autocomplete="given-name"></label>
+      <label class="field"><span>Sua relação com a pessoa (filha, esposo, neto…)</span><input type="text" id="r-relacao" autocomplete="off"></label>
+      <label class="field"><span>Como vocês chamam a pessoa que teve o AVC?</span><input type="text" id="r-pessoa" autocomplete="off" placeholder="Ex.: Dona Maria, vô João"></label>
+    </div>
+
+    <h3 style="margin-top:24px">Qual destas frases combina mais com você?</h3>
+    <div class="choice" role="radiogroup">
+      <label><input type="radio" name="papel" value="principal"><span><strong>Sou quem mais acompanha o dia a dia de <span class="pn">a pessoa</span>.</strong><small>Você responde as duas partes: o dia a dia e o seu olhar.</small></span></label>
+      <label><input type="radio" name="papel" value="complementar"><span><strong>Convivo com <span class="pn">a pessoa</span>, mas outra pessoa da família acompanha mais o dia a dia.</strong><small>Você responde só a parte do seu olhar. A parte do dia a dia fica opcional, se quiser acrescentar algo.</small></span></label>
+    </div>
+  </div>
+</section>
+
+<section id="perguntas" class="hidden">
+  <div class="wrap">
+    <div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel" aria-live="polite"></div>
+    <div id="partes"></div>
+
+    <div class="send-bar">
+      <label class="consent">
+        <input type="checkbox" id="consent">
+        <span>Concordo que minhas respostas sejam guardadas e usadas para planejar o aplicativo. Sei que a participação é voluntária e que posso pedir para apagar minhas respostas a qualquer momento. <a href="index.html#privacidade" target="_blank" rel="noopener">Como os dados são cuidados</a></span>
+      </label>
+      <div class="toolbar" style="margin-top:0">
+        <button type="button" class="primary" id="btnSend">Enviar respostas</button>
+        <button type="button" id="btnMd">Baixar uma cópia</button>
+      </div>
+      <div class="saved" id="savedMsg" aria-live="polite"></div>
+      <div class="progress-label" id="sentInfo"></div>
+      <div class="thanks callout" id="thanks">
+        <p><strong>Muito obrigada!</strong> Suas respostas foram recebidas. Se lembrar de mais alguma coisa, pode voltar a este link neste aparelho, completar e enviar de novo — suas respostas serão atualizadas, sem duplicar.</p>
+        <p>Se outra pessoa da família também quiser participar, é só enviar este mesmo link para ela.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Este material não substitui avaliação de fonoaudiologia ou médica. · <a href="index.html" target="_blank" rel="noopener">Sobre comunicação após o AVC</a></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // Parte 1: fatos do dia a dia (basta uma pessoa responder). Parte 2: o olhar de cada um.
+  // {p} é trocado pelo nome que a pessoa informar.
+  var PARTES = [
+    {id:"dia", titulo:"Parte 1 · O dia a dia de {p}", sub:"Perguntas sobre como {p} está hoje. Basta uma pessoa da família responder.", blocos:[
+      {id:"A", titulo:"Como está agora", porque:"Ajuda a entender o momento da recuperação.", qs:[
+        "Quando foi o AVC de {p}? Foi o primeiro?",
+        "Qual lado do corpo foi afetado?",
+        "{p} faz fonoaudiologia? A fono explicou o que aconteceu com a fala ou a linguagem? Se souber, conte o nome que ela usou.",
+        "Desde o AVC, a comunicação de {p} está melhorando, igual ou piorando?"
+      ]},
+      {id:"B", titulo:"Entender o que os outros dizem", porque:"Mostra se o aplicativo precisa falar em voz alta, mostrar fotos ou usar palavras escritas.", qs:[
+        "{p} entende quando vocês falam? E frases longas? E quando várias pessoas falam ao mesmo tempo?",
+        "{p} consegue responder “sim” e “não” de um jeito confiável (falando, balançando a cabeça, com um gesto)? Às vezes diz “sim” querendo dizer “não”?",
+        "{p} consegue ler? Palavras soltas, frases curtas, textos?",
+        "{p} reconhece fotos de pessoas e objetos? E desenhos ou símbolos?"
+      ]},
+      {id:"C", titulo:"Se expressar", porque:"Mostra por onde a mensagem de {p} consegue sair hoje.", qs:[
+        "{p} fala alguma coisa? O quê? (palavras soltas, frases prontas, palavras trocadas…)",
+        "A fala sai, mas é difícil de entender (arrastada, fraca)? Ou a palavra simplesmente não vem?",
+        "{p} consegue escrever, mesmo que pouco? Com qual mão?",
+        "{p} usa gestos, aponta, desenha ou faz mímica?",
+        "Hoje, como vocês descobrem o que {p} quer? Vocês criaram algum jeito próprio de se entender?"
+      ]},
+      {id:"D", titulo:"Corpo, visão e energia", porque:"Define o tamanho dos botões, onde ficam na tela e quanto tempo de uso é confortável.", qs:[
+        "Qual mão {p} usa agora? Tem tremor ou dificuldade para tocar em coisas pequenas?",
+        "Como está a visão? Usa óculos? Parece não perceber as coisas de um lado (esbarra, come só metade do prato)?",
+        "Como está a audição?",
+        "{p} cansa rápido? Em que horário costuma estar melhor?",
+        "{p} passa mais tempo na cama, na cadeira ou anda pela casa?"
+      ]},
+      {id:"E", titulo:"Rotina e necessidades", porque:"Ajuda a decidir o que precisa estar sempre à mão no aplicativo.", qs:[
+        "Como é um dia comum de {p}, do acordar ao dormir?",
+        "O que {p} mais precisa comunicar? (dor, fome, sede, banheiro, desconforto, emoções, vontades, conversar sobre a vida…)",
+        "Em que momentos a comunicação mais falha ou causa mais frustração?",
+        "Com quem {p} conversa? Quem cuida em cada período do dia?",
+        "{p} sai de casa? Para onde? Precisa se comunicar com pessoas desconhecidas?"
+      ]},
+      {id:"F", titulo:"Celular e tecnologia", porque:"Ajuda a escolher em que aparelho o aplicativo vai funcionar e quem vai cuidar dele.", qs:[
+        "{p} usava celular antes do AVC? Para quê?",
+        "Que aparelho poderia ser usado (celular Android, iPhone, tablet)? Tem internet em casa?",
+        "Quem da família poderia ajudar a configurar e atualizar o aplicativo?",
+        "Já tentaram alguma prancha, aplicativo ou caderno para se comunicar? O que funcionou e o que foi deixado de lado? Por quê?"
+      ]}
+    ]},
+    {id:"olhar", titulo:"Parte 2 · O seu olhar", sub:"Aqui cada pessoa da família tem algo diferente para contar. Responda pensando na sua relação com {p}.", blocos:[
+      {id:"G", titulo:"Lembranças e jeito de ser", porque:"Vira o vocabulário do aplicativo: nomes, assuntos e frases que são a cara de {p}.", qs:[
+        "Quem são as pessoas importantes para {p}? Nomes e apelidos.",
+        "Do que {p} gosta? Comidas, músicas, programas, time, fé, assuntos preferidos.",
+        "Qual era o trabalho de {p}? Do que tinha orgulho?",
+        "{p} tem expressões típicas, um jeito próprio de brincar? Conte algumas.",
+        "Sobre o que você acha que {p} gostaria de conversar e hoje não consegue?"
+      ]},
+      {id:"H", titulo:"Como é para você", porque:"Ajuda a pensar como o aplicativo pode apoiar também quem conversa com {p}.", qs:[
+        "Quando {p} não consegue se fazer entender com você, como reage?",
+        "{p} aceita ajuda? Parece sentir vergonha de usar recursos na frente dos outros?",
+        "Como você vê o humor de {p} de modo geral?",
+        "E você, como está lidando com tudo isso?"
+      ]},
+      {id:"I", titulo:"O que você espera", porque:"Mostra o que o aplicativo precisa resolver primeiro.", qs:[
+        "Se o aplicativo desse certo, o que mudaria na vida de {p} e na sua? Como seria um “deu certo”?",
+        "Quer contar mais alguma coisa?"
+      ]}
+    ]}
+  ];
+
+  var params = new URLSearchParams(location.search);
+  var TOKEN = (params.get("c") || "").trim();
+  var CFG = window.CONVERSA_CONFIG || {};
+  if (!TOKEN) {
+    document.getElementById("semConvite").classList.remove("hidden");
+    document.getElementById("app").classList.add("hidden");
+  }
+
+  var KEY = "conversa-apoiada-" + TOKEN;
+  function novoId(){ try{ return crypto.randomUUID(); }catch(e){ return "r-" + Date.now().toString(36) + Math.random().toString(36).slice(2,8); } }
+  var state = {id:novoId(), r:{nome:"", relacao:"", pessoa:"", papel:""}, answers:{}, consent:false, enviadoEm:null, pendente:false};
+  try{ var raw = localStorage.getItem(KEY); if(raw){ var d = JSON.parse(raw); for (var k in d) state[k] = d[k]; } }catch(e){}
+
+  var flashTimer;
+  function flash(t){ var el = document.getElementById("savedMsg"); el.textContent = t; clearTimeout(flashTimer); flashTimer = setTimeout(function(){ el.textContent = ""; }, t.length > 40 ? 9000 : 2500); }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+  function nomeP(){ return (state.r.pessoa || "").trim() || "a pessoa"; }
+  function txt(s){
+    var n = nomeP();
+    return s.replace(/^\{p\}/, n.charAt(0).toUpperCase() + n.slice(1)).replace(/\{p\}/g, n);
+  }
+  function rotuloPlanilha(s){ return s.replace(/\{p\}/g, "[pessoa]"); }
+
+  var blocosVisiveis = [];
+  function render(){
+    document.querySelectorAll(".pn").forEach(function(el){ el.textContent = nomeP(); });
+    var papel = state.r.papel;
+    document.getElementById("perguntas").classList.toggle("hidden", !papel);
+    if (!papel) return;
+    var host = document.getElementById("partes");
+    var abertos = {};
+    host.querySelectorAll("details.block").forEach(function(d){ abertos[d.dataset.b] = d.open; });
+    host.innerHTML = "";
+    var n = 0; blocosVisiveis = [];
+    var ordem = papel === "principal" ? PARTES : [PARTES[1], PARTES[0]];
+    ordem.forEach(function(parte){
+      var opcional = papel === "complementar" && parte.id === "dia";
+      var h = document.createElement("h2"); h.className = "part-title";
+      h.innerHTML = txt(parte.titulo) + (opcional ? ' <span class="optional-note">(opcional)</span>' : "");
+      var sub = document.createElement("p"); sub.className = "part-sub";
+      sub.textContent = opcional ? "Outra pessoa da família deve responder esta parte. Abra um tema só se quiser acrescentar algo que você observa." : txt(parte.sub);
+      host.appendChild(h); host.appendChild(sub);
+      parte.blocos.forEach(function(b, bi){
+        if (!opcional) blocosVisiveis.push(b);
+        var det = document.createElement("details"); det.className = "block"; det.dataset.b = b.id;
+        det.open = (b.id in abertos) ? abertos[b.id] : (!opcional && bi === 0);
+        var sum = document.createElement("summary");
+        sum.innerHTML = '<span class="letter">' + b.id + '</span><span></span><span class="count" data-count="' + b.id + '"></span>';
+        sum.children[1].textContent = txt(b.titulo);
+        det.appendChild(sum);
+        var body = document.createElement("div"); body.className = "block-body";
+        var why = document.createElement("p"); why.className = "block-why"; why.textContent = "Por que perguntamos: " + txt(b.porque); body.appendChild(why);
+        b.qs.forEach(function(q, qi){
+          n++;
+          var id = b.id + (qi + 1);
+          var wrap = document.createElement("div"); wrap.className = "q";
+          var lab = document.createElement("label"); lab.setAttribute("for", "q-" + id);
+          lab.innerHTML = '<span class="num">' + n + '.</span>';
+          lab.appendChild(document.createTextNode(txt(q)));
+          var ta = document.createElement("textarea"); ta.id = "q-" + id;
+          ta.value = state.answers[id] || "";
+          ta.addEventListener("input", function(){ state.answers[id] = ta.value; state.pendente = true; save(); progresso(); });
+          wrap.appendChild(lab); wrap.appendChild(ta); body.appendChild(wrap);
+        });
+        det.appendChild(body); host.appendChild(det);
+      });
+    });
+    progresso();
+  }
+
+  function preenchida(id){ return (state.answers[id] || "").trim().length > 0; }
+  function progresso(){
+    var total = 0, feitas = 0;
+    PARTES.forEach(function(p){ p.blocos.forEach(function(b){
+      var c = 0; b.qs.forEach(function(_, qi){ if (preenchida(b.id + (qi + 1))) c++; });
+      var el = document.querySelector('[data-count="' + b.id + '"]'); if (el) el.textContent = c + "/" + b.qs.length;
+      if (blocosVisiveis.indexOf(b) >= 0){ total += b.qs.length; feitas += c; }
+    }); });
+    document.getElementById("progressBar").style.width = (total ? feitas / total * 100 : 0) + "%";
+    document.getElementById("progressLabel").textContent = feitas + " de " + total + " perguntas respondidas" + (state.r.papel === "complementar" ? " (sem contar as opcionais)" : "");
+    mostrarEnvio();
+  }
+  function mostrarEnvio(){
+    var el = document.getElementById("sentInfo");
+    if (!state.enviadoEm){ el.textContent = ""; return; }
+    el.textContent = "Enviado em " + new Date(state.enviadoEm).toLocaleString("pt-BR") + (state.pendente ? " · há mudanças ainda não enviadas" : "");
+    document.getElementById("thanks").classList.toggle("show", !state.pendente);
+  }
+
+  // campos "sobre você"
+  ["nome", "relacao", "pessoa"].forEach(function(k){
+    var el = document.getElementById("r-" + k); el.value = state.r[k] || "";
+    el.addEventListener("input", function(){ state.r[k] = el.value; state.pendente = !!state.enviadoEm; save(); if (k === "pessoa") render(); else mostrarEnvio(); });
+  });
+  document.querySelectorAll('input[name="papel"]').forEach(function(rd){
+    rd.checked = rd.value === state.r.papel;
+    rd.addEventListener("change", function(){ state.r.papel = rd.value; state.pendente = !!state.enviadoEm; save(); render(); });
+  });
+  var consent = document.getElementById("consent");
+  consent.checked = !!state.consent;
+  consent.addEventListener("change", function(){ state.consent = consent.checked; save(); });
+
+  function listaPerguntas(){
+    var out = [];
+    PARTES.forEach(function(p){ p.blocos.forEach(function(b){ b.qs.forEach(function(q, qi){ out.push({id: b.id + (qi + 1), texto: rotuloPlanilha(q)}); }); }); });
+    return out;
+  }
+
+  document.getElementById("btnSend").onclick = function(){
+    var btn = this;
+    if (!state.r.nome.trim()){ flash("Escreva seu nome no início da página, por favor."); document.getElementById("r-nome").focus(); return; }
+    if (!state.consent){ flash("Para enviar, marque que concorda com o uso das respostas."); consent.focus(); return; }
+    if (!CFG.scriptUrl){ flash("O envio ainda não está ativado. Suas respostas continuam guardadas neste aparelho."); return; }
+    var payload = {acao:"enviar", token:TOKEN, id:state.id, consentimento:true,
+      respondente:{nome:state.r.nome, relacao:[state.r.relacao.trim(), state.r.pessoa.trim() ? "(pessoa: " + state.r.pessoa.trim() + ")" : ""].filter(Boolean).join(" "), papel:state.r.papel},
+      perguntas:listaPerguntas(), respostas:state.answers};
+    btn.disabled = true; btn.textContent = "Enviando…";
+    fetch(CFG.scriptUrl, {method:"POST", body:JSON.stringify(payload)})
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (!res.ok) throw new Error(res.erro || "Falha no envio.");
+        state.enviadoEm = new Date().toISOString(); state.pendente = false; save(); mostrarEnvio();
+        flash(res.atualizado ? "✓ Respostas atualizadas." : "✓ Respostas enviadas.");
+      })
+      .catch(function(err){ flash("Não foi possível enviar agora: " + err.message + " Suas respostas continuam guardadas neste aparelho; tente de novo mais tarde."); })
+      .then(function(){ btn.disabled = false; btn.textContent = "Enviar respostas"; });
+  };
+
+  document.getElementById("btnMd").onclick = function(){
+    var L = ["# Conversa Apoiada — minhas respostas", "", "- **Nome:** " + state.r.nome, "- **Relação:** " + state.r.relacao, "- **Pessoa:** " + nomeP(), ""];
+    var n = 0;
+    PARTES.forEach(function(p){
+      L.push("## " + txt(p.titulo), "");
+      p.blocos.forEach(function(b){
+        L.push("### " + txt(b.titulo), "");
+        b.qs.forEach(function(q, qi){ n++; var a = (state.answers[b.id + (qi + 1)] || "").trim(); L.push("**" + n + ". " + txt(q) + "**", "", a || "_(sem resposta)_", ""); });
+      });
+    });
+    var blob = new Blob([L.join("\n")], {type:"text/markdown;charset=utf-8"});
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "minhas-respostas.md";
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  };
+
+  var root = document.documentElement;
+  try{ var t = localStorage.getItem("avc-theme"); if (t) root.setAttribute("data-theme", t); }catch(e){}
+  document.getElementById("themeBtn").onclick = function(){
+    var cur = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var next = cur === "dark" ? "light" : "dark"; root.setAttribute("data-theme", next);
+    try{ localStorage.setItem("avc-theme", next); }catch(e){}
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>

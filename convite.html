@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Convites</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<script src="config.js"></script>
+<style>
+.link-out{word-break:break-all;font-family:ui-monospace,monospace;font-size:.95rem;background:var(--surface-2);padding:10px 12px;border-radius:10px;margin:8px 0}
+.hist li{margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Conversa Apoiada · Uso da equipe</span>
+    <h1>Convites para entrevista</h1>
+    <p class="lede">Crie um link para cada família. Todos os familiares usam o mesmo link, e as respostas chegam na planilha identificadas por família e por pessoa.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Navegação">
+  <div class="wrap">
+    <a href="pesquisa.html">Pesquisa de base</a>
+    <a href="index.html">Página para as famílias</a>
+    <button class="theme-btn" type="button" id="themeBtn" aria-label="Alternar tema claro ou escuro">◐ Tema</button>
+  </div>
+</nav>
+
+<main>
+<section>
+  <div class="wrap">
+    <h2>Novo convite</h2>
+    <div class="meta-fields">
+      <label class="field"><span>Nome ou apelido da família</span><input type="text" id="familia" autocomplete="off" placeholder="Ex.: Família da Dona Maria"></label>
+      <label class="field"><span>Seu código de acesso</span><input type="password" id="codigo" autocomplete="off"></label>
+      <label class="field" style="align-self:end"><span>&nbsp;</span><button type="button" class="primary" id="btnGerar" style="width:100%">Gerar convite</button></label>
+    </div>
+    <p class="privacy">O código de acesso fica guardado só neste aparelho, para não precisar digitar de novo.</p>
+    <div class="saved" id="msg" aria-live="polite"></div>
+
+    <div id="resultado" class="card hidden">
+      <h3>Link para <span id="resFamilia"></span></h3>
+      <div class="link-out" id="resLink"></div>
+      <div class="toolbar">
+        <button type="button" class="primary" id="btnCopiar">Copiar link</button>
+        <a class="btn" id="btnZap" target="_blank" rel="noopener" style="text-decoration:none">Enviar pelo WhatsApp</a>
+        <button type="button" id="btnCopiarMsg">Copiar mensagem pronta</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Convites criados neste aparelho</h2>
+    <p class="privacy">A lista completa de famílias fica na aba “Famílias” da planilha.</p>
+    <ul class="clean hist" id="hist"></ul>
+  </div>
+</section>
+</main>
+
+<script>
+(function(){
+  var CFG = window.CONVERSA_CONFIG || {};
+  var K_COD = "conversa-apoiada-codigo", K_HIST = "conversa-apoiada-convites";
+  function get(k, d){ try{ var v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } }
+  function set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  var msg = document.getElementById("msg");
+  function flash(t){ msg.textContent = t; }
+
+  var base = location.href.replace(/[^\/]*([?#].*)?$/, "") + "entrevista.html?c=";
+  function linkDe(token){ return base + token; }
+  function mensagem(fam, link){
+    return "Olá! Estou criando um aplicativo para ajudar pessoas que tiveram AVC a se comunicar com a família, e gostaria muito de ouvir vocês (" + fam + "). " +
+      "São algumas perguntas, leva uns 15 a 25 minutos e pode ser respondido aos poucos. Mais de uma pessoa da família pode responder pelo mesmo link:\n" + link;
+  }
+
+  document.getElementById("codigo").value = get(K_COD, "");
+
+  function mostrar(fam, token){
+    var link = linkDe(token);
+    document.getElementById("resFamilia").textContent = fam;
+    document.getElementById("resLink").textContent = link;
+    document.getElementById("btnZap").href = "https://wa.me/?text=" + encodeURIComponent(mensagem(fam, link));
+    document.getElementById("btnCopiar").onclick = function(){ copiar(link, "Link copiado."); };
+    document.getElementById("btnCopiarMsg").onclick = function(){ copiar(mensagem(fam, link), "Mensagem copiada."); };
+    document.getElementById("resultado").classList.remove("hidden");
+  }
+  function copiar(t, ok){
+    if (navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){ flash(ok); }, function(){ flash("Não deu para copiar automaticamente: selecione e copie o texto."); }); }
+    else flash("Selecione e copie o texto.");
+  }
+
+  function historico(){
+    var h = get(K_HIST, []), ul = document.getElementById("hist"); ul.innerHTML = "";
+    if (!h.length){ ul.innerHTML = "<li>Nenhum convite criado ainda neste aparelho.</li>"; return; }
+    h.slice().reverse().forEach(function(it){
+      var li = document.createElement("li");
+      var b = document.createElement("strong"); b.textContent = it.familia;
+      var s = document.createElement("span"); s.textContent = " · " + new Date(it.em).toLocaleDateString("pt-BR") + " · ";
+      var a = document.createElement("a"); a.href = "#"; a.textContent = "mostrar link";
+      a.onclick = function(e){ e.preventDefault(); mostrar(it.familia, it.token); window.scrollTo({top:0, behavior:"smooth"}); };
+      li.appendChild(b); li.appendChild(s); li.appendChild(a); ul.appendChild(li);
+    });
+  }
+
+  document.getElementById("btnGerar").onclick = function(){
+    var fam = document.getElementById("familia").value.trim(), cod = document.getElementById("codigo").value, btn = this;
+    if (!fam){ flash("Escreva o nome ou apelido da família."); return; }
+    if (!cod){ flash("Digite seu código de acesso."); return; }
+    if (!CFG.scriptUrl){ flash("O endereço do script ainda não foi configurado (config.js)."); return; }
+    btn.disabled = true; btn.textContent = "Gerando…"; flash("");
+    fetch(CFG.scriptUrl, {method:"POST", body:JSON.stringify({acao:"convite", codigo:cod, familia:fam})})
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (!res.ok) throw new Error(res.erro || "Falha ao gerar.");
+        set(K_COD, cod);
+        var h = get(K_HIST, []); h.push({familia:fam, token:res.token, em:new Date().toISOString()}); set(K_HIST, h);
+        document.getElementById("familia").value = "";
+        mostrar(fam, res.token); historico(); flash("Convite criado.");
+      })
+      .catch(function(err){ flash("Não foi possível gerar: " + err.message); })
+      .then(function(){ btn.disabled = false; btn.textContent = "Gerar convite"; });
+  };
+
+  var root = document.documentElement;
+  try{ var t = localStorage.getItem("avc-theme"); if (t) root.setAttribute("data-theme", t); }catch(e){}
+  document.getElementById("themeBtn").onclick = function(){
+    var cur = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var next = cur === "dark" ? "light" : "dark"; root.setAttribute("data-theme", next);
+    try{ localStorage.setItem("avc-theme", next); }catch(e){}
+  };
+  historico();
+})();
+</script>
+</body>
+</html>
