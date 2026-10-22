@@ -57,12 +57,12 @@
         <p>Cada resposta é salva enquanto você digita, só no navegador deste aparelho. Dá para fechar e voltar depois. Nada vai para a internet nem para o GitHub.</p>
       </div>
       <div class="card">
-        <h3>Exportar para guardar</h3>
-        <p>Ao terminar, use <strong>Exportar (.md)</strong> para ter um arquivo legível, ou <strong>Exportar dados (.json)</strong> para continuar em outro aparelho com <strong>Importar</strong>.</p>
+        <h3>Enviar para a planilha</h3>
+        <p>Ao terminar (ou no meio, se quiser), toque em <strong>Enviar para a planilha</strong>. A entrevista vai para a sua planilha no Google. Enviar de novo atualiza a mesma linha, sem duplicar.</p>
       </div>
       <div class="card">
         <h3>Cuidado com</h3>
-        <p>Limpar dados do navegador ou usar janela anônima apaga as respostas. Em aparelho compartilhado, exporte e use <strong>Limpar respostas</strong> ao final.</p>
+        <p>Antes de enviar, as respostas existem só neste aparelho: limpar o navegador ou usar janela anônima apaga tudo. Em aparelho compartilhado, envie e use <strong>Nova entrevista</strong> ao final.</p>
       </div>
     </div>
   </div>
@@ -71,6 +71,18 @@
 <section id="perguntas">
   <div class="wrap">
     <h2>Perguntas</h2>
+
+    <details class="block no-print" id="cfgBox">
+      <summary><span class="letter">⚙</span><span>Conexão com a planilha</span><span class="count" id="cfgStatus"></span></summary>
+      <div class="block-body">
+        <p class="block-why">Preencha uma vez por aparelho. Os dois campos ficam guardados só aqui, não vão para o site.</p>
+        <div class="meta-fields" style="grid-template-columns:1fr">
+          <label class="field"><span>Endereço do script (URL terminado em /exec)</span><input type="text" id="cfg-url" autocomplete="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec"></label>
+          <label class="field"><span>Código de acesso</span><input type="password" id="cfg-codigo" autocomplete="off"></label>
+        </div>
+        <button type="button" id="btnCfg">Salvar conexão</button>
+      </div>
+    </details>
 
     <div class="meta-fields">
       <label class="field"><span>Família / pessoa (apelido ou iniciais)</span><input type="text" id="meta-nome" autocomplete="off"></label>
@@ -82,15 +94,17 @@
     <div class="progress-label" id="progressLabel" aria-live="polite">0 de 0 perguntas respondidas</div>
 
     <div class="toolbar no-print">
-      <button type="button" class="primary" id="btnMd">Exportar (.md)</button>
+      <button type="button" class="primary" id="btnSend">Enviar para a planilha</button>
+      <button type="button" id="btnMd">Exportar (.md)</button>
       <button type="button" id="btnJson">Exportar dados (.json)</button>
       <label class="btn" for="fileImport" style="display:inline-block">Importar .json</label>
       <input type="file" id="fileImport" accept="application/json" hidden>
       <button type="button" id="btnExpand">Abrir todos</button>
       <button type="button" id="btnPrint">Imprimir</button>
-      <button type="button" id="btnClear">Limpar respostas</button>
+      <button type="button" id="btnClear">Nova entrevista</button>
     </div>
     <div class="saved" id="savedMsg" aria-live="polite"></div>
+    <div class="progress-label" id="sentInfo"></div>
 
     <div id="blocks"></div>
   </div>
@@ -163,16 +177,19 @@
     ]}
   ];
   var KEY = "avc-roteiro-v1";
-  var state = {meta:{}, answers:{}};
+  var CFG_KEY = "avc-roteiro-planilha";
+  function novoId(){ try{ return crypto.randomUUID(); }catch(e){ return "e-" + Date.now().toString(36) + Math.random().toString(36).slice(2,8); } }
+  function novoEstado(){ return {id:novoId(), meta:{}, answers:{}, enviadoEm:null}; }
+  var state = novoEstado();
 
   function load(){
-    try{ var raw = localStorage.getItem(KEY); if(raw){ var d = JSON.parse(raw); state.meta = d.meta||{}; state.answers = d.answers||{}; } }catch(e){}
+    try{ var raw = localStorage.getItem(KEY); if(raw){ var d = JSON.parse(raw); state.id = d.id || novoId(); state.meta = d.meta||{}; state.answers = d.answers||{}; state.enviadoEm = d.enviadoEm||null; } }catch(e){}
   }
   var saveTimer;
   function save(){
     try{ localStorage.setItem(KEY, JSON.stringify(state)); flash("✓ Salvo neste aparelho."); }catch(e){ flash("Não foi possível salvar aqui — use Exportar."); }
   }
-  function flash(t){ var el = document.getElementById("savedMsg"); el.textContent = t; clearTimeout(saveTimer); saveTimer = setTimeout(function(){ el.textContent=""; }, 2500); }
+  function flash(t){ var el = document.getElementById("savedMsg"); el.textContent = t; clearTimeout(saveTimer); saveTimer = setTimeout(function(){ el.textContent=""; }, t.length > 40 ? 8000 : 2500); }
 
   var total = 0;
   function render(){
@@ -194,14 +211,14 @@
         lab.appendChild(document.createTextNode(q));
         var ta = document.createElement("textarea"); ta.id = "q-"+id;
         ta.value = state.answers[id] || "";
-        ta.addEventListener("input", function(){ state.answers[id] = ta.value; updateProgress(); save(); });
+        ta.addEventListener("input", function(){ state.answers[id] = ta.value; state.pendente = true; updateProgress(); save(); });
         wrap.appendChild(lab); wrap.appendChild(ta); body.appendChild(wrap);
       });
       det.appendChild(body); host.appendChild(det);
     });
     ["nome","quem","data"].forEach(function(k){
       var el = document.getElementById("meta-"+k); el.value = state.meta[k] || "";
-      el.oninput = function(){ state.meta[k] = el.value; save(); };
+      el.oninput = function(){ state.meta[k] = el.value; state.pendente = true; mostrarEnvio(); save(); };
     });
     updateProgress();
   }
@@ -215,6 +232,7 @@
     });
     document.getElementById("progressBar").style.width = (total ? (done/total*100) : 0) + "%";
     document.getElementById("progressLabel").textContent = done + " de " + total + " perguntas respondidas";
+    mostrarEnvio();
   }
 
   function download(name, text, type){
@@ -245,7 +263,7 @@
   document.getElementById("fileImport").onchange = function(e){
     var f = e.target.files[0]; if(!f) return;
     var r = new FileReader();
-    r.onload = function(){ try{ var d = JSON.parse(r.result); state.meta = d.meta||{}; state.answers = d.answers||{}; save(); render(); flash("Respostas importadas."); }catch(err){ flash("Arquivo inválido."); } };
+    r.onload = function(){ try{ var d = JSON.parse(r.result); state.id = d.id || novoId(); state.meta = d.meta||{}; state.answers = d.answers||{}; state.enviadoEm = d.enviadoEm||null; save(); render(); flash("Respostas importadas."); }catch(err){ flash("Arquivo inválido."); } };
     r.readAsText(f); e.target.value = "";
   };
   document.getElementById("btnExpand").onclick = function(){
@@ -254,8 +272,49 @@
   };
   document.getElementById("btnPrint").onclick = function(){ document.querySelectorAll("details.block").forEach(function(d){ d.open = true; }); window.print(); };
   document.getElementById("btnClear").onclick = function(){
-    if(!confirm("Apagar todas as respostas deste aparelho? Exporte antes se quiser guardar.")) return;
-    state = {meta:{}, answers:{}}; try{ localStorage.removeItem(KEY); }catch(e){} render(); flash("Respostas apagadas.");
+    var aviso = state.enviadoEm ? "Começar uma nova entrevista? As respostas atuais saem deste aparelho (a cópia enviada continua na planilha)." : "Começar uma nova entrevista? Esta ainda NÃO foi enviada para a planilha e será apagada deste aparelho.";
+    if(!confirm(aviso)) return;
+    state = novoEstado(); try{ localStorage.removeItem(KEY); }catch(e){} render(); flash("Nova entrevista iniciada.");
+  };
+
+  // ---- planilha ----
+  function lerCfg(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)||"{}"); }catch(e){ return {}; } }
+  function mostrarCfg(){
+    var c = lerCfg();
+    document.getElementById("cfg-url").value = c.url||"";
+    document.getElementById("cfg-codigo").value = c.codigo||"";
+    var ok = c.url && c.codigo;
+    document.getElementById("cfgStatus").textContent = ok ? "conectada" : "não configurada";
+    if(!ok) document.getElementById("cfgBox").open = true;
+  }
+  document.getElementById("btnCfg").onclick = function(){
+    var url = document.getElementById("cfg-url").value.trim(), codigo = document.getElementById("cfg-codigo").value;
+    if(url && !/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)){ flash("O endereço deve começar com https://script.google.com/ e terminar em /exec."); return; }
+    try{ localStorage.setItem(CFG_KEY, JSON.stringify({url:url, codigo:codigo})); }catch(e){}
+    mostrarCfg(); document.getElementById("cfgBox").open = false; flash("Conexão salva neste aparelho.");
+  };
+  function mostrarEnvio(){
+    var el = document.getElementById("sentInfo");
+    if(!state.enviadoEm){ el.textContent = "Ainda não enviada para a planilha."; return; }
+    var d = new Date(state.enviadoEm);
+    el.textContent = "Enviada em " + d.toLocaleString("pt-BR") + (state.pendente ? " · há alterações não enviadas" : "");
+  }
+  document.getElementById("btnSend").onclick = function(){
+    var c = lerCfg(), btn = this;
+    if(!c.url || !c.codigo){ document.getElementById("cfgBox").open = true; flash("Configure a conexão com a planilha primeiro."); return; }
+    var perguntas = [];
+    BLOCKS.forEach(function(b){ b.qs.forEach(function(q, qi){ perguntas.push({id:b.id+(qi+1), texto:q}); }); });
+    var payload = {codigo:c.codigo, id:state.id, meta:state.meta, perguntas:perguntas, respostas:state.answers};
+    btn.disabled = true; btn.textContent = "Enviando…";
+    fetch(c.url, {method:"POST", body:JSON.stringify(payload)})
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if(!res.ok) throw new Error(res.erro || "Falha no envio.");
+        state.enviadoEm = new Date().toISOString(); state.pendente = false; save(); mostrarEnvio();
+        flash(res.atualizado ? "✓ Planilha atualizada." : "✓ Enviada para a planilha.");
+      })
+      .catch(function(err){ flash("Não foi possível enviar: " + err.message + " As respostas continuam salvas aqui."); })
+      .then(function(){ btn.disabled = false; btn.textContent = "Enviar para a planilha"; });
   };
 
   var root = document.documentElement;
@@ -266,7 +325,7 @@
     try{ localStorage.setItem("avc-theme", next); }catch(e){}
   };
 
-  load(); render();
+  load(); render(); mostrarCfg();
 })();
 </script>
 </body>
