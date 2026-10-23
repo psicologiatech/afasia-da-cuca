@@ -141,11 +141,12 @@
   cursor: pointer;
   box-shadow: var(--shadow);
   transition: transform 0.08s ease;
+  container-type: size; /* o nome cresce conforme o tamanho do card */
 }
 .botao:active { transform: scale(0.97); }
 
 .imagem {
-  flex: 1 1 auto;
+  flex: 0 0 60%; /* 60% imagem, 40% nome */
   min-height: 0;
   display: flex;
   align-items: center;
@@ -163,12 +164,18 @@
 .emoji { font-size: clamp(2.8rem, 9vmin, 6.5rem); line-height: 1; }
 
 .rotulo {
-  flex: 0 0 auto;
-  padding: 8px 6px 10px;
+  flex: 0 0 40%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
   font-weight: 700;
-  font-size: clamp(1.15rem, 2.8vw, 2rem);
-  line-height: 1.15;
+  font-size: clamp(1.4rem, min(17cqh, 13.5cqw), 4.5rem);
+  line-height: 1.05;
   text-align: center;
+  text-wrap: balance;
+  overflow: hidden;
 }
 
 .chamar { border-color: #d35400 !important; background: color-mix(in srgb, #d35400 16%, var(--surface)); }
@@ -346,3 +353,9 @@
   font: inherit; font-size: 1.3rem; border: 2px solid var(--accent);
   background: var(--surface); color: var(--ink); cursor: pointer;
 }
+
+.mais .emoji, .adicionar .emoji { flex: 0 0 auto; }
+.mais .rotulo, .adicionar .rotulo { flex: 0 0 auto; }
+.acoesPessoa .ligar { background: #1e8e3e; color: #fff; }
+.acoesPessoa .fechar { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+.acoesPessoa a { text-decoration: none; padding: 14px 22px; border-radius: 14px; font-size: clamp(1.1rem, 2.4vw, 1.6rem); font-weight: 700; }

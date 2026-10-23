@@ -16,6 +16,11 @@ type StatusNuvem = "local" | "salvo" | "enviando" | "pendente" | "erro";
 type Destaque = { texto: string; emoji?: string; foto?: string } | null;
 type Edicao = { telaId: string; item: ItemPrancha; novo: boolean } | null;
 
+// Telefones: guardados só com dígitos; o Brasil (55) é acrescentado quando falta
+const soDigitos = (t: string) => t.replace(/\D/g, "");
+const telefoneDiscavel = (t: string) => { const d = soDigitos(t); return `+${d.length <= 11 ? "55" + d : d}`; };
+const telefoneWhatsApp = (t: string) => { const d = soDigitos(t); return d.length <= 11 ? `55${d}` : d; };
+
 const TEMPO_SEGURAR = 1500; // ms segurando a engrenagem para abrir o modo família
 const BLOQUEIO_TOQUE = 700; // ms ignorando toques repetidos (tremor, toque duplo)
 
@@ -178,7 +183,8 @@ export const Prancha: React.FC = () => {
     if (!manterPessoa) setPessoa(null);
     setDestaque({ texto, emoji, foto });
     if (timerDestaque.current) clearTimeout(timerDestaque.current);
-    timerDestaque.current = setTimeout(() => setDestaque(null), 4000);
+    // em Pessoas, o destaque fica aberto até alguém fechar (há ações para escolher)
+    if (!manterPessoa) timerDestaque.current = setTimeout(() => setDestaque(null), 4000);
   }, [dados.config.velocidadeVoz]);
 
   const telasVisiveis = useMemo(
@@ -531,6 +537,13 @@ export const Prancha: React.FC = () => {
               <button type="button" onClick={() => dizer(`Chama ${pessoa.rotulo} aqui, por favor.`, pessoa.emoji, pessoa.foto, true)}>Chamar aqui</button>
               <button type="button" onClick={() => dizer(`Como está ${pessoa.rotulo}?`, pessoa.emoji, pessoa.foto, true)}>Como está?</button>
               <button type="button" onClick={() => dizer(`Quero ver ${pessoa.rotulo}.`, pessoa.emoji, pessoa.foto, true)}>Quero ver</button>
+              {pessoa.telefone && (
+                <>
+                  <a className={styles.ligar} href={`tel:${telefoneDiscavel(pessoa.telefone)}`} onClick={() => falar(`Ligando para ${pessoa.rotulo}.`, dados.config.velocidadeVoz)}>📞 Ligar para {pessoa.rotulo}</a>
+                  <a className={styles.ligar} href={`https://wa.me/${telefoneWhatsApp(pessoa.telefone)}`} target="_blank" rel="noopener noreferrer" onClick={() => falar(`Abrindo o WhatsApp de ${pessoa.rotulo}.`, dados.config.velocidadeVoz)}>WhatsApp</a>
+                </>
+              )}
+              <button type="button" className={styles.fechar} onClick={() => { setDestaque(null); setPessoa(null); }}>✕ Fechar</button>
             </span>
           )}
         </div>
@@ -655,6 +668,12 @@ const EditorItem: React.FC<{
           <span>{grupo ? "Nome do grupo" : pessoa ? "Nome ou apelido" : "Nome no botão"}</span>
           <input type="text" value={item.rotulo} onChange={(e) => setItem((i) => ({ ...i, rotulo: e.target.value }))} placeholder={grupo ? "Ex.: Noras" : pessoa ? "Ex.: Pedro" : "Ex.: Leite com chocolate"} autoFocus={edicao.novo} />
         </label>
+        {pessoa && (
+          <label className={styles.campo}>
+            <span>Telefone para “Ligar para…” (opcional, com DDD)</span>
+            <input type="tel" inputMode="tel" value={item.telefone || ""} onChange={(e) => setItem((i) => ({ ...i, telefone: e.target.value.replace(/[^\d\s()+-]/g, "") || undefined }))} placeholder="Ex.: (48) 99999-0000" />
+          </label>
+        )}
         {pessoa && grupos.length > 0 && (
           <label className={styles.campo}>
             <span>Grupo</span>
