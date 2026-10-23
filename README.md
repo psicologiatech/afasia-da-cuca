@@ -1,98 +1,112 @@
-# Conversa Apoiada 🧠🗣️
+# Conversa Apoiada
 
-Aplicativo e entrevista colaborativa com famílias para desenhar soluções de comunicação alternativa para pessoas que tiveram AVC (com afasia, disartria ou apraxia de fala).
+Aplicativo de **Comunicação Alternativa** para uma pessoa com **afasia após um AVC**, feito em família e desenhado a partir de uma entrevista com quem convive com ela.
 
-Migrado para **Next.js 14 (App Router / API Routes)**, **React**, **TypeScript**, **CSS Modules** e **Prisma ORM** para fácil deploy na **Vercel** com banco de dados **PostgreSQL** (Vercel Postgres / Neon).
+A ideia central: em vez de falar uma lista de opções e esperar um “sim” ou “não” (que, na afasia, nem sempre são confiáveis), **mostrar todas as opções de uma vez, em fotos, para a pessoa apontar**. O app fala a escolha em voz alta.
 
----
-
-## 🚀 Tecnologias
-
-- **Framework:** Next.js 14 (App Router)
-- **Linguagem:** TypeScript
-- **Estilização:** CSS Modules (estilos isolados por componente) + CSS Global com temas claro/escuro
-- **Banco de Dados & ORM:** Prisma ORM com PostgreSQL (compatível com Vercel Postgres e Neon)
-- **Hospedagem:** Vercel
+> Projeto da PsicologiaTech. Material de apoio: não substitui avaliação fonoaudiológica ou médica.
 
 ---
 
-## 📂 Estrutura do Projeto
+## O que existe hoje
 
-```text
-conversa-apoiada/
-├── prisma/
-│   └── schema.prisma           # Esquema do banco (Familias e Respostas)
-├── src/
-│   ├── app/                    # Rotas do Next.js 14
-│   │   ├── page.tsx            # Página inicial para famílias
-│   │   ├── page.module.css     # Estilos da página inicial
-│   │   ├── entrevista/         # Entrevista interativa colaborativa (?c=CODIGO)
-│   │   ├── convite/            # Área da equipe para gerar links de convite
-│   │   ├── pesquisa/           # Pesquisa clínica e diretrizes de design
-│   │   └── api/                # API Routes (Route Handlers)
-│   │       ├── convite/route.ts   # Criação e consulta de convites
-│   │       └── respostas/route.ts # Envio e busca com filtro LGPD do bloco H
-│   ├── components/             # Componentes React modulares
-│   │   ├── Header/             # Header Hero + Header.module.css
-│   │   ├── Navbar/             # Menu de navegação + Navbar.module.css
-│   │   ├── Card/               # Cards reutilizáveis + Card.module.css
-│   │   ├── Callout/            # Destaques visuais + Callout.module.css
-│   │   ├── Footer/             # Rodapé + Footer.module.css
-│   │   └── ThemeToggle/        # Alternador de tema claro/escuro
-│   ├── data/
-│   │   └── perguntas.ts        # Dados estruturados das perguntas (Blocos A a I)
-│   ├── lib/
-│   │   └── prisma.ts           # Singleton do Prisma Client
-│   └── styles/
-│       └── globals.css         # Variáveis de cor, tipografia e tema
-├── legacy/                     # Arquivos estáticos da versão anterior (referência)
-└── .env.example                # Variáveis de ambiente necessárias
-```
+| Rota | Para quem | O que faz |
+|---|---|---|
+| **`/prancha`** | A pessoa com afasia (tablet ao lado da cama) | Prancha por fotos: 8 botões numa tela só, “Não é isso” fixo, dor em dois passos, chamar alguém com som, teclado para treinar a escrita e **modo família** para tirar fotos na hora. Detalhes em [`docs/proposta-prancha.md`](docs/proposta-prancha.md). |
+| `/` | — | Primeira versão da tela inicial (categorias com subcategorias, Sim/Não, dor de 0 a 10, Teclado Grande). |
+| `/gerenciar` | Equipe | Editar categorias e itens da tela inicial. |
+| `/entrevista?c=CÓDIGO` | Famílias | Entrevista colaborativa: cada familiar responde, e o bloco “Como é para você” fica privado. |
+| `/convite` | Equipe | Gera os links de convite da entrevista. |
+| `/pesquisa` | Equipe | Pesquisa de base: afasia, disartria, apraxia, soluções existentes e lições de design. |
+
+A pasta [`entrevista/`](entrevista/) guarda a **primeira versão** da entrevista, em páginas estáticas que gravam numa planilha Google ([`apps-script/Codigo.gs`](apps-script/Codigo.gs)). Ela ficou como referência: com o site na Vercel, essas páginas não são mais publicadas.
 
 ---
 
-## 🛠️ Como Executar Localmente
+## Tecnologias
 
-### 1. Clonar e Instalar Dependências
+- **Next.js 14** (App Router), **React 18**, **TypeScript**, **CSS Modules**
+- **Prisma ORM** com **PostgreSQL no Neon**
+- **Vercel Blob privado** para as fotos (planejado; veja abaixo)
+- **Web Speech API** (`pt-BR`) para a voz, sem serviço pago
+- Hospedagem na **Vercel**
+
+## Infraestrutura
+
+| Peça | Situação | Observação |
+|---|---|---|
+| Projeto na Vercel | ✅ Criado e ligado ao repositório | Cada push na `main` publica; cada pull request ganha um link de prévia. |
+| Banco **Neon** | A conectar | Criar pela aba **Storage** da Vercel. Escolher a região de São Paulo, se estiver disponível, para os dados ficarem no Brasil (LGPD). |
+| **Blob privado** | A conectar | Criar pela aba **Storage** com acesso **Private**. Fotos privadas só são lidas com autenticação, por uma rota do próprio app. |
+| GitHub Pages | Desativado | Substituído pela Vercel. |
+
+### Variáveis de ambiente
+
+| Variável | De onde vem |
+|---|---|
+| `DATABASE_URL` | Preenchida pela Vercel ao conectar o Neon |
+| `BLOB_READ_WRITE_TOKEN` / OIDC | Preenchidas pela Vercel ao conectar o Blob |
+| `CODIGO_ACESSO` | **Definir à mão** em *Settings → Environment Variables*. É o código da equipe para gerar convites e alterar itens. |
+| `NEXT_PUBLIC_APP_URL` | Endereço público do site (ex.: `https://<projeto>.vercel.app`) |
+
+Modelo em [`.env.example`](.env.example). **Nunca faça commit do `.env`.**
+
+---
+
+## Rodar na sua máquina
+
 ```bash
-npm install
+npm install          # instala e gera o Prisma Client
+cp .env.example .env # preencha DATABASE_URL e CODIGO_ACESSO
+npx prisma db push   # cria as tabelas no banco (primeira vez)
+npm run dev          # http://localhost:3000
 ```
 
-### 2. Configurar Variáveis de Ambiente
-Crie um arquivo `.env` baseado no `.env.example`:
-```env
-DATABASE_URL="postgresql://usuario:senha@localhost:5432/conversa_apoiada?sslmode=require"
-CODIGO_ACESSO="seu_codigo_secreto"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-```
+A rota **`/prancha` funciona sem banco**: ela guarda tudo no próprio aparelho, então dá para testá-la logo depois do `npm install`.
 
-### 3. Sincronizar o Banco de Dados
-Para aplicar o esquema ao seu banco de dados:
-```bash
-npx prisma db push
-```
-
-### 4. Iniciar o Servidor de Desenvolvimento
-```bash
-npm run dev
-```
-Acesse [http://localhost:3000](http://localhost:3000).
+Para ver em tamanho real, abra no tablet, deitado, pela rede local: `npm run dev -- -H 0.0.0.0` e acesse `http://<ip-do-computador>:3000/prancha`.
 
 ---
 
-## ☁️ Hospedagem na Vercel
+## Como trabalhamos
 
-1. Suba o repositório no seu GitHub.
-2. Na [Vercel](https://vercel.com):
-   - Importe o repositório.
-   - Vá na aba **Storage** e crie um banco **Vercel Postgres** (Neon) com 1 clique.
-   - Conecte o banco ao projeto (a variável `DATABASE_URL` será preenchida automaticamente).
-   - Adicione a variável `CODIGO_ACESSO` nas configurações de ambiente (**Settings → Environment Variables**).
-3. O deploy rodará automaticamente! O comando `npm run build` já executa `prisma generate && next build`.
+- **Ninguém envia direto para a `main`.** Cada mudança vai numa branch própria (`proposta/…`, `docs/…`, `correcao/…`) e entra por **pull request**, revisado pela outra pessoa da equipe.
+- A Vercel gera um **link de prévia** para cada pull request: teste ali, de preferência no tablet.
+- Mensagens de commit em português, dizendo o que mudou e por quê.
+- Decisões de design partem do que a família contou e do que a fonoaudióloga orientar. Quando não houver certeza, testar com a pessoa antes de construir.
 
 ---
 
-## 🔒 Privacidade e LGPD
+## Privacidade e LGPD
 
-- **Bloco H ("Como é para você"):** Questões delicadas sobre sentimentos e sobrecarga do cuidador são estritamente privadas — a API `/api/respostas` filtra e nunca entrega essas respostas aos demais membros da família.
-- **Acesso Restrito:** Apenas membros com o token do convite conseguem acessar o formulário da respectiva família.
+O app lida com **dados de saúde** de uma pessoa e com fotos e nomes da família.
+
+- **Este repositório é público.** Não coloque aqui nomes, fotos, respostas da entrevista, telefones nem detalhes de saúde. O conteúdo inicial da prancha é genérico de propósito.
+- **Fotos ficam privadas.** Hoje ficam só no tablet (IndexedDB). Com o Blob, ficarão num armazenamento privado, servidas só para quem tem acesso à prancha da família.
+- **Bloco “Como é para você” da entrevista:** só a equipe lê. A API não entrega essas respostas aos familiares.
+- **Rotas que alteram dados** (`/api/db/*`, `/api/convite`) exigem o `CODIGO_ACESSO`.
+- A entrevista só é enviada com **consentimento** de quem responde.
+
+---
+
+## Próximos passos
+
+1. Conectar o Neon e o Blob privado na Vercel.
+2. Ligar a `/prancha` ao banco e ao Blob, mantendo a cópia no aparelho para funcionar sem internet.
+3. Acesso da prancha por link da família (só leitura) e PIN para o modo família.
+4. Teste com a pessoa e com os cuidadores, e revisão dos itens de comida e bebida com a fonoaudióloga.
+5. Decidir se a `/prancha` passa a ser a tela inicial.
+
+---
+
+## Documentação
+
+- [Arquitetura e tecnologias](docs/arquitetura-e-tecnologias.md)
+- [Estrutura de pastas e módulos](docs/estrutura-de-pastas-e-modulos.md)
+- [Banco de dados](docs/banco-de-dados.md)
+- [Guia de desenvolvimento](docs/guia-de-desenvolvimento.md)
+- [Proposta da prancha por fotos](docs/proposta-prancha.md)
+
+## Equipe
+
+Karolyne Silva Alves (psicóloga, CRP 12/12179) e Caio Espindola.
