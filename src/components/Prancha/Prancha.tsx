@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import styles from "./Prancha.module.css";
 import { DadosPrancha, ItemPrancha, TelaPrancha } from "./tipos";
 import { CONTEUDO_INICIAL, INTENSIDADE_DOR, PARTES_DOR, comGenero } from "./conteudoInicial";
+import { TecladoGrande } from "../TecladoGrande/TecladoGrande";
 import { carregarDados, falar, iniciarChamado, novoId, pararChamado, prepararFoto, salvarDados } from "./apoio";
 
 // Prancha por fotos: tudo numa tela só, uma camada de profundidade,
@@ -30,6 +31,7 @@ export const Prancha: React.FC = () => {
   const [segurando, setSegurando] = useState(false);
   const [noite, setNoite] = useState(false);
   const [aviso, setAviso] = useState("");
+  const [teclado, setTeclado] = useState(false);
 
   const ultimoToque = useRef(0);
   const timerSegurar = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -255,7 +257,9 @@ export const Prancha: React.FC = () => {
             <span aria-hidden>⌂</span> {parteDor ? "Voltar" : "Início"}
           </button>
         ) : (
-          <span className={styles.espaco} />
+          <button type="button" className={styles.inicio} onClick={() => setTeclado(true)} aria-label="Abrir o teclado para escrever">
+            <span aria-hidden>⌨</span> Escrever
+          </button>
         )}
         <button type="button" className={styles.naoEIsso} onClick={naoEIsso}>✋ Não é isso</button>
         <button type="button" className={styles.sim} onClick={sim}>👍 Sim</button>
@@ -326,6 +330,9 @@ export const Prancha: React.FC = () => {
           testar={(s) => falar(t(s), dados.config.velocidadeVoz)}
         />
       )}
+
+      {/* teclado do Caio, mantido para incentivar a escrita */}
+      <TecladoGrande aberto={teclado} onFechar={() => setTeclado(false)} />
 
       {aviso && <div className={styles.aviso} onClick={() => setAviso("")}>{aviso}</div>}
     </div>
