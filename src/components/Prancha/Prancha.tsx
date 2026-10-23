@@ -6,7 +6,7 @@ import { DadosPrancha, ItemPrancha, TelaPrancha } from "./tipos";
 import { CONTEUDO_INICIAL, INTENSIDADE_DOR, PARTES_DOR, comGenero } from "./conteudoInicial";
 import { TecladoGrande } from "../TecladoGrande/TecladoGrande";
 import { carregarDados, falar, iniciarChamado, novoId, pararChamado, prepararFoto, salvarDados } from "./apoio";
-import { EstadoSync, baixar, enviar, guardarPin, lerPin, lerSync, mesclarFotos, obterToken, salvarSync } from "./sincronizacao";
+import { EstadoSync, baixar, criarNaNuvem, enviar, guardarPin, guardarToken, lerPin, lerSync, linkDaPrancha, mesclarFotos, obterToken, salvarSync } from "./sincronizacao";
 
 type StatusNuvem = "local" | "salvo" | "enviando" | "pendente" | "erro";
 
@@ -38,6 +38,8 @@ export const Prancha: React.FC = () => {
   const [token, setToken] = useState<string | null>(null);
   const [nuvem, setNuvem] = useState<StatusNuvem>("local");
   const [pedirPin, setPedirPin] = useState(false);
+  const [nuvemAberta, setNuvemAberta] = useState(false);
+  const tokenRef = useRef<string | null>(null);
   const dadosRef = useRef(dados);
   const syncRef = useRef<EstadoSync>({ pendente: false, apagar: [] });
   const enviandoRef = useRef(false);
@@ -57,7 +59,7 @@ export const Prancha: React.FC = () => {
 
   // envia ao servidor o que está pendente (precisa do PIN, que só existe no modo família)
   const sincronizar = useCallback(async () => {
-    const tk = token, pin = lerPin();
+    const tk = tokenRef.current, pin = lerPin();
     if (!tk || !syncRef.current.pendente || enviandoRef.current) return;
     if (!pin) { setNuvem("pendente"); return; }
     if (!navigator.onLine) { setNuvem("pendente"); return; }
@@ -77,7 +79,7 @@ export const Prancha: React.FC = () => {
     } finally {
       enviandoRef.current = false;
     }
-  }, [token, guardarLocal]);
+  }, [guardarLocal]);
 
   const atualizar = useCallback((novo: DadosPrancha, apagarFotos: string[] = []) => {
     guardarLocal(novo);
@@ -112,6 +114,7 @@ export const Prancha: React.FC = () => {
   // carregar do aparelho e, se houver link da família, da nuvem
   useEffect(() => {
     const tk = obterToken();
+    tokenRef.current = tk;
     setToken(tk);
     syncRef.current = lerSync();
     carregarDados().then((d) => {
@@ -374,6 +377,9 @@ export const Prancha: React.FC = () => {
           <span className={styles.nuvem} data-status={nuvem}>
             {{ local: "📱 Só neste aparelho", salvo: "☁️ Salvo na nuvem", enviando: "☁️ Enviando…", pendente: "⏳ Aguardando internet", erro: "⚠️ Não sincronizou" }[nuvem]}
           </span>
+          <button type="button" className={!token ? styles.primario : ""} onClick={() => setNuvemAberta(true)}>
+            {token ? "Link do tablet" : "☁️ Salvar na nuvem"}
+          </button>
           <button type="button" onClick={() => setConfigAberta(true)}>Configurações</button>
           <button type="button" onClick={() => { setFamilia(false); setConfigAberta(false); }}>Sair</button>
         </div>
@@ -416,6 +422,20 @@ export const Prancha: React.FC = () => {
           token={token}
           onOk={(pin) => { guardarPin(pin); setPedirPin(false); setFamilia(true); void sincronizar(); }}
           onFechar={() => setPedirPin(false)}
+        />
+      )}
+
+      {nuvemAberta && (
+        <SalvarNaNuvem
+          token={token}
+          onCriada={async (tk, pin) => {
+            guardarToken(tk); guardarPin(pin);
+            tokenRef.current = tk; setToken(tk);
+            syncRef.current = { pendente: true, apagar: [] }; salvarSync(syncRef.current);
+            await sincronizar();
+            return syncRef.current.pendente === false;
+          }}
+          onFechar={() => setNuvemAberta(false)}
         />
       )}
 
@@ -654,6 +674,93 @@ const PedirPin: React.FC<{ token: string; onOk: (pin: string) => void; onFechar:
           <span className={styles.espaco} />
           <button type="button" onClick={onFechar}>Cancelar</button>
           <button type="submit" className={styles.primario} disabled={conferindo}>{conferindo ? "Conferindo…" : "Entrar"}</button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// ---------- Salvar na nuvem / link do tablet ----------
+
+const SalvarNaNuvem: React.FC<{
+  token: string | null;
+  onCriada: (token: string, pin: string) => Promise<boolean>;
+  onFechar: () => void;
+}> = ({ token, onCriada, onFechar }) => {
+  const [codigo, setCodigo] = useState("");
+  const [pin, setPin] = useState("");
+  const [pin2, setPin2] = useState("");
+  const [msg, setMsg] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [copiado, setCopiado] = useState(false);
+
+  useEffect(() => { try { setCodigo(localStorage.getItem("conversa-codigo-acesso") || ""); } catch { /* */ } }, []);
+
+  const salvar = async () => {
+    setMsg("");
+    if (!codigo) { setMsg("Digite o código da equipe."); return; }
+    if (!/^\d{6,10}$/.test(pin)) { setMsg("O PIN precisa ter de 6 a 10 números."); return; }
+    if (pin !== pin2) { setMsg("Os dois PINs não são iguais."); return; }
+    setEnviando(true);
+    try {
+      const tk = await criarNaNuvem(codigo, "Prancha da família", pin);
+      try { localStorage.setItem("conversa-codigo-acesso", codigo); } catch { /* */ }
+      const ok = await onCriada(tk, pin);
+      if (!ok) setMsg("A prancha foi criada, mas as fotos ainda não subiram. Elas sobem sozinhas quando houver internet.");
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Não foi possível salvar na nuvem.");
+    }
+    setEnviando(false);
+  };
+
+  if (token) {
+    const link = linkDaPrancha(token);
+    const copiar = async () => {
+      try { await navigator.clipboard.writeText(link); setCopiado(true); } catch { setMsg("Selecione o link e copie."); }
+    };
+    return (
+      <div className={styles.modalFundo} onClick={onFechar}>
+        <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Link do tablet">
+          <h2>☁️ A prancha está na nuvem</h2>
+          <p>Abra este link <strong>uma vez</strong> no tablet (e no celular de quem for tirar fotos). Depois é só abrir a prancha normalmente.</p>
+          <p className={styles.linkTablet}>{link}</p>
+          <div className={styles.linha}>
+            <button type="button" className={styles.primario} onClick={copiar}>{copiado ? "Copiado ✓" : "Copiar link"}</button>
+            <a className={styles.botaoLink} href={`https://wa.me/?text=${encodeURIComponent("Link da prancha: " + link)}`} target="_blank" rel="noopener noreferrer">Enviar por WhatsApp</a>
+          </div>
+          <p className={styles.dica}>Quem tiver o link vê a prancha. Para mudar fotos e frases, precisa do PIN. Não coloque o link em grupos abertos.</p>
+          {msg && <p className={styles.erro}>{msg}</p>}
+          <div className={styles.rodapeModal}><span className={styles.espaco} /><button type="button" onClick={onFechar}>Fechar</button></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.modalFundo} onClick={onFechar}>
+      <form className={styles.modal} onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); void salvar(); }} role="dialog" aria-label="Salvar na nuvem">
+        <h2>☁️ Salvar na nuvem</h2>
+        <p>Assim as fotos e frases deste aparelho ficam guardadas com segurança e aparecem no tablet e no celular da família.</p>
+        <label className={styles.campo}>
+          <span>Código da equipe</span>
+          <input id="nuvem-codigo" type="password" autoComplete="off" value={codigo} onChange={(e) => setCodigo(e.target.value)} />
+        </label>
+        <div className={styles.linha}>
+          <label className={styles.campo} style={{ flex: 1 }}>
+            <span>Escolha um PIN da família (6 a 10 números)</span>
+            <input id="nuvem-pin" type="password" inputMode="numeric" autoComplete="new-password" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} />
+          </label>
+          <label className={styles.campo} style={{ flex: 1 }}>
+            <span>Repita o PIN</span>
+            <input id="nuvem-pin2" type="password" inputMode="numeric" autoComplete="new-password" value={pin2} onChange={(e) => setPin2(e.target.value.replace(/\D/g, ""))} />
+          </label>
+        </div>
+        <p className={styles.dica}>O PIN é pedido para trocar fotos e frases. Guarde-o: ele não aparece de novo.</p>
+        {msg && <p className={styles.erro}>{msg}</p>}
+        <div className={styles.rodapeModal}>
+          <span className={styles.espaco} />
+          <button type="button" onClick={onFechar}>Cancelar</button>
+          <button type="submit" className={styles.primario} disabled={enviando}>{enviando ? "Salvando…" : "Salvar na nuvem"}</button>
         </div>
       </form>
     </div>

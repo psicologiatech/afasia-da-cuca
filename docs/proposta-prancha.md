@@ -55,7 +55,7 @@ A prancha funciona de dois jeitos:
 |---|---|
 | Ver a prancha e as fotos | O link (token) |
 | Trocar fotos, frases e configurações | O link **e o PIN** do modo família |
-| Criar uma prancha nova (`/prancha/criar`) | O `CODIGO_ACESSO` da equipe |
+| Criar uma prancha nova (**☁️ Salvar na nuvem** no modo família, ou `/prancha/criar`) | O `CODIGO_ACESSO` da equipe |
 
 **Como sincroniza:**
 - Ao abrir, o aparelho mostra a cópia local na hora e depois confere o servidor.

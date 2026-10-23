@@ -22,6 +22,24 @@ export function obterToken(): string | null {
   } catch { return null; }
 }
 
+export function guardarToken(token: string) {
+  try { localStorage.setItem(CHAVE_TOKEN, token); } catch { /* */ }
+}
+
+export const linkDaPrancha = (token: string) => `${location.origin}/prancha?t=${encodeURIComponent(token)}`;
+
+// Cria a prancha na nuvem (código da equipe + PIN escolhido) e devolve o token do link.
+export async function criarNaNuvem(codigo: string, nome: string, pin: string): Promise<string> {
+  const r = await fetch("/api/prancha", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-codigo-acesso": codigo },
+    body: JSON.stringify({ nome, pin }),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.ok) throw new Error(j.erro || "Não foi possível salvar na nuvem.");
+  return j.token;
+}
+
 export function esquecerToken() {
   try { localStorage.removeItem(CHAVE_TOKEN); localStorage.removeItem(CHAVE_SYNC); sessionStorage.removeItem(CHAVE_PIN); } catch { /* */ }
 }
