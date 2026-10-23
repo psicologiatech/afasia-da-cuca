@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { exigirCodigo } from "@/lib/autorizacao";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,8 @@ export async function GET() {
 
 // Criar nova categoria ou subcategoria
 export async function POST(req: NextRequest) {
+  const negado = exigirCodigo(req);
+  if (negado) return negado;
   try {
     const body = await req.json();
     const { nome, icone, parentId } = body;
@@ -63,6 +66,8 @@ export async function POST(req: NextRequest) {
 
 // Excluir categoria ou subcategoria
 export async function DELETE(req: NextRequest) {
+  const negado = exigirCodigo(req);
+  if (negado) return negado;
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
