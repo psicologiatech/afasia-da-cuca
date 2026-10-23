@@ -14,6 +14,7 @@ export interface ItemPrancha {
   personalizado?: boolean; // criado pela família (pode ser excluído)
   ehGrupo?: boolean; // em Pessoas: um grupo (ex.: "Noras") que abre as pessoas dele
   grupo?: string; // em Pessoas: id do grupo a que a pessoa pertence
+  telefone?: string; // em Pessoas: número para "Ligar para…" (só dígitos, com DDD)
 }
 
 export interface TelaPrancha {
