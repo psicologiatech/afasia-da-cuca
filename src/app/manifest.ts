@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 // Torna a prancha instalável: abre em tela cheia, sem a barra do navegador.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Conversa Apoiada",
-    short_name: "Prancha",
+    name: "Afasia da Cuca",
+    short_name: "Afasia da Cuca",
     description: "Prancha de comunicação por fotos.",
     lang: "pt-BR",
     start_url: "/prancha",
