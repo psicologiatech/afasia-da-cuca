@@ -1,4 +1,4 @@
-# Conversa Apoiada
+# Afasia da Cuca
 
 Aplicativo de **Comunicação Alternativa** para uma pessoa com **afasia após um AVC**, feito em família e desenhado a partir de uma entrevista com quem convive com ela.
 
