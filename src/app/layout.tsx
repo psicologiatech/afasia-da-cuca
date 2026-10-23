@@ -17,11 +17,11 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Conversa Apoiada — Comunicação e Apoio Pós-AVC",
+  title: "Afasia da Cuca",
   description:
     "Aplicativo e entrevista com famílias para desenhar apoio de comunicação alternativa para pessoas que tiveram AVC.",
-  applicationName: "Conversa Apoiada",
-  appleWebApp: { capable: true, title: "Prancha", statusBarStyle: "black-translucent" },
+  applicationName: "Afasia da Cuca",
+  appleWebApp: { capable: true, title: "Afasia da Cuca", statusBarStyle: "black-translucent" },
   icons: { icon: "/icons/icone-192.png", apple: "/icons/apple-touch-icon.png" },
 };
 

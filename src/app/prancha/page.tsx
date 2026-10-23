@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Prancha } from "@/components/Prancha/Prancha";
 
 export const metadata: Metadata = {
-  title: "Prancha — Conversa Apoiada",
+  title: "Afasia da Cuca",
   description: "Prancha de comunicação por fotos, para usar no tablet.",
 };
 

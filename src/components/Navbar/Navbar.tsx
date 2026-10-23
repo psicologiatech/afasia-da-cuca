@@ -19,7 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({ items }) => {
   const pathname = usePathname();
 
   const defaultItems: NavItem[] = [
-    { label: "🗣️ App Conversa Apoiada", href: "/" },
+    { label: "🗣️ Afasia da Cuca", href: "/" },
     { label: "📋 Entrevista Familiar", href: "/entrevista" },
     { label: "🔬 Pesquisa de Base", href: "/pesquisa" },
     { label: "🔑 Gerar Convites", href: "/convite" },
