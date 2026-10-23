@@ -53,6 +53,16 @@ Modelo em [`.env.example`](.env.example). **Nunca faça commit do `.env`.**
 
 ---
 
+## Instalar no tablet
+
+A prancha é um app instalável (PWA): abre em tela cheia, com ícone próprio, e funciona sem internet depois da primeira abertura.
+
+1. Abra no tablet o **link da família** (`…/prancha?t=…`).
+2. **Android (Chrome):** menu ⋮ → *Instalar app*. No modo família, o botão **📲 Instalar** também faz isso.
+3. **iPad (Safari):** *Compartilhar* → *Adicionar à Tela de Início*. No iPad, o app instalado não vê o que foi aberto no Safari: abra pelo ícone, entre no modo família e use **Salvar na nuvem → Já tenho o link da família**.
+
+O service worker (`public/sw.js`) guarda só o app. As rotas `/api` (dados e fotos) nunca vão para o cache.
+
 ## Rodar na sua máquina
 
 ```bash
