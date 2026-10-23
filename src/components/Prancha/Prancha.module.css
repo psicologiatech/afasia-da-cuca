@@ -295,3 +295,6 @@
 
 .nuvem { flex: 0 0 auto !important; min-width: 0 !important; font-size: 0.95rem; padding: 4px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); }
 .nuvem[data-status="erro"] { color: #c0392b; border-color: #c0392b; }
+
+.linkTablet { word-break: break-all; background: var(--surface-2); padding: 10px 12px; border-radius: 10px; font-size: 0.95rem; user-select: all; }
+.botaoLink { font: inherit; font-size: 1rem; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; }

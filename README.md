@@ -13,7 +13,7 @@ A ideia central: em vez de falar uma lista de opções e esperar um “sim” ou
 | Rota | Para quem | O que faz |
 |---|---|---|
 | **`/prancha`** | A pessoa com afasia (tablet ao lado da cama) | Prancha por fotos: 8 botões numa tela só, “Não é isso” fixo, dor em dois passos, chamar alguém com som, teclado para treinar a escrita e **modo família** para tirar fotos na hora. Detalhes em [`docs/proposta-prancha.md`](docs/proposta-prancha.md). |
-| `/prancha/criar` | Equipe | Cria a prancha de uma família na nuvem e gera o link do tablet e o PIN do modo família. |
+| `/prancha/criar` | Equipe | Alternativa para criar a prancha de uma família na nuvem. O caminho mais simples é o botão **☁️ Salvar na nuvem**, dentro do modo família. |
 | `/` e `/gerenciar` | — | Abrem a `/prancha`. A primeira tela inicial (`HomeApp`) e a edição antiga (`GerenciarAntigo`) continuam no código, mas não são mais publicadas: a edição é feita na própria prancha, pelo modo família. |
 | `/entrevista?c=CÓDIGO` | — | Entrevista colaborativa com a família (**fora de uso**: a entrevista já foi feita). |
 | `/convite` | — | Gerava os links da entrevista (**fora de uso**). |
@@ -92,7 +92,7 @@ O app lida com **dados de saúde** de uma pessoa e com fotos e nomes da família
 
 ## Próximos passos
 
-1. Criar a prancha da família em `/prancha/criar` e abrir o link no tablet.
+1. No navegador onde estão as fotos: modo família (segurar a ⚙) → **☁️ Salvar na nuvem** → abrir no tablet o link que aparece.
 2. Teste com a pessoa e com os cuidadores, e revisão dos itens de comida e bebida com a fonoaudióloga.
 3. Decidir se a `/prancha` passa a ser a tela inicial.
 4. Registro simples de uso no tablet (o que foi tocado, quantos “Não é isso”), para orientar ajustes.
