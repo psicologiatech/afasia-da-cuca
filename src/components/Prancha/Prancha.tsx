@@ -204,6 +204,7 @@ export const Prancha: React.FC = () => {
   };
 
   const tocarItem = (tl: TelaPrancha, it: ItemPrancha) => {
+    if (arrastouRef.current) { arrastouRef.current = false; return; }
     if (it.ehGrupo) {
       if (!familia && !podeTocar()) return;
       if (!familia) falar(t(it.fala || it.rotulo), dados.config.velocidadeVoz);
@@ -282,21 +283,60 @@ export const Prancha: React.FC = () => {
       },
     });
   };
-  // move um item uma posição para trás (-1) ou para frente (+1), entre os que aparecem na mesma tela
-  const moverItem = (telaIdMv: string, id: string, direcao: -1 | 1) => {
+  // coloca o item "id" no lugar do item "alvoId", entre os que aparecem na mesma tela
+  const moverPara = (telaIdMv: string, id: string, alvoId: string) => {
     const tl = dados.telas.find((x) => x.id === telaIdMv);
-    if (!tl) return;
-    const alvo = tl.itens.find((i) => i.id === id);
-    if (!alvo) return;
-    const vizinhos = tl.itens.map((i, idx) => ({ i, idx })).filter(({ i }) => (i.grupo || null) === (alvo.grupo || null));
-    const pos = vizinhos.findIndex(({ i }) => i.id === id);
-    const outro = vizinhos[pos + direcao];
-    if (!outro) return;
+    if (!tl || id === alvoId) return;
+    const arrastado = tl.itens.find((i) => i.id === id);
+    if (!arrastado) return;
+    const posicoes = tl.itens.map((i, idx) => ({ i, idx })).filter(({ i }) => (i.grupo || null) === (arrastado.grupo || null));
+    const ordem = posicoes.map(({ i }) => i);
+    const de = ordem.findIndex((i) => i.id === id), para = ordem.findIndex((i) => i.id === alvoId);
+    if (de < 0 || para < 0) return;
+    ordem.splice(para, 0, ordem.splice(de, 1)[0]);
     const itens = [...tl.itens];
-    const a = vizinhos[pos].idx, b = outro.idx;
-    [itens[a], itens[b]] = [itens[b], itens[a]];
+    posicoes.forEach(({ idx }, k) => { itens[idx] = ordem[k]; });
     atualizar({ ...dados, telas: dados.telas.map((x) => (x.id === telaIdMv ? { ...x, itens } : x)) });
   };
+
+  // ----- arrastar e soltar (modo família): funciona com dedo e com mouse -----
+  const toqueInicial = useRef<{ id: string; telaId: string; x: number; y: number; rect: DOMRect } | null>(null);
+  const arrastouRef = useRef(false);
+  const [arrasto, setArrasto] = useState<{ id: string; telaId: string; dx: number; dy: number; alvo: string | null } | null>(null);
+  const arrastoRef = useRef(arrasto);
+  arrastoRef.current = arrasto;
+  const moverParaRef = useRef(moverPara);
+  moverParaRef.current = moverPara;
+
+  useEffect(() => {
+    const mover = (e: PointerEvent) => {
+      const ini = toqueInicial.current;
+      if (!ini) return;
+      const dx = e.clientX - ini.x, dy = e.clientY - ini.y;
+      if (!arrastoRef.current && Math.hypot(dx, dy) < 10) return; // ainda é um toque, não um arrasto
+      const sob = document.elementsFromPoint(e.clientX, e.clientY)
+        .map((el) => (el as HTMLElement).closest?.("[data-celula]") as HTMLElement | null)
+        .find((el) => el && el.dataset.celula !== ini.id);
+      setArrasto({ id: ini.id, telaId: ini.telaId, dx, dy, alvo: sob?.dataset.celula ?? null });
+    };
+    const soltar = () => {
+      const a = arrastoRef.current;
+      if (a) {
+        arrastouRef.current = true; // evita que o "clique" do fim do arrasto abra o editor
+        if (a.alvo) moverParaRef.current(a.telaId, a.id, a.alvo);
+      }
+      toqueInicial.current = null;
+      setArrasto(null);
+    };
+    window.addEventListener("pointermove", mover);
+    window.addEventListener("pointerup", soltar);
+    window.addEventListener("pointercancel", soltar);
+    return () => {
+      window.removeEventListener("pointermove", mover);
+      window.removeEventListener("pointerup", soltar);
+      window.removeEventListener("pointercancel", soltar);
+    };
+  }, []);
 
   // ---------- telas ----------
 
@@ -319,19 +359,27 @@ export const Prancha: React.FC = () => {
     </button>
   );
 
-  // no modo família, cada card ganha setas para mudar a ordem (e ✎ nos grupos)
-  const Celula = ({ telaIdC, it, primeiro, ultimo, children }: { telaIdC: string; it: ItemPrancha; primeiro: boolean; ultimo: boolean; children: React.ReactNode }) => (
-    <div className={styles.celula}>
-      {children}
-      {familia && (
-        <div className={styles.ordem}>
-          <button type="button" aria-label={`Mover ${it.rotulo} para antes`} disabled={primeiro} onClick={() => moverItem(telaIdC, it.id, -1)}>◀</button>
-          {it.ehGrupo && <button type="button" aria-label={`Editar o grupo ${it.rotulo}`} onClick={() => setEdicao({ telaId: telaIdC, item: { ...it }, novo: false })}>✎</button>}
-          <button type="button" aria-label={`Mover ${it.rotulo} para depois`} disabled={ultimo} onClick={() => moverItem(telaIdC, it.id, 1)}>▶</button>
-        </div>
-      )}
-    </div>
-  );
+  // no modo família, cada card pode ser arrastado para outro lugar (e os grupos têm ✎)
+  const Celula = ({ telaIdC, it, children }: { telaIdC: string; it: ItemPrancha; children: React.ReactNode }) => {
+    const arrastando = arrasto?.id === it.id;
+    return (
+      <div
+        className={`${styles.celula} ${arrastando ? styles.arrastando : ""} ${arrasto?.alvo === it.id ? styles.alvoSoltar : ""}`}
+        data-celula={it.id}
+        style={arrastando ? { transform: `translate(${arrasto.dx}px, ${arrasto.dy}px) scale(1.04)` } : undefined}
+        onPointerDown={(e) => {
+          if (!familia || (e.target as HTMLElement).closest("[data-sem-arrasto]")) return;
+          arrastouRef.current = false;
+          toqueInicial.current = { id: it.id, telaId: telaIdC, x: e.clientX, y: e.clientY, rect: e.currentTarget.getBoundingClientRect() };
+        }}
+      >
+        {children}
+        {familia && it.ehGrupo && (
+          <button type="button" data-sem-arrasto className={styles.editarGrupo} aria-label={`Editar o grupo ${it.rotulo}`} onClick={() => setEdicao({ telaId: telaIdC, item: { ...it }, novo: false })}>✎</button>
+        )}
+      </div>
+    );
+  };
 
   const Mais = ({ total }: { total: number }) => (
     <button type="button" className={`${styles.botao} ${styles.mais}`} onClick={() => setPagina((p) => (p + 1) % total)}>
@@ -388,7 +436,7 @@ export const Prancha: React.FC = () => {
         )}
         <div className={`${styles.grade} ${dados.config.modoSimples ? styles.grade4 : ""}`}>
           {pg.itens.map((it) => (
-            <Celula key={it.id} telaIdC={tela.id} it={it} primeiro={doContexto[0]?.id === it.id} ultimo={doContexto[doContexto.length - 1]?.id === it.id}>
+            <Celula key={it.id} telaIdC={tela.id} it={it}>
               <Botao
                 rotulo={t(it.rotulo)} emoji={it.emoji} foto={it.foto} cor={tela.cor} oculto={it.oculto}
                 editavel={familia && !it.ehGrupo} classe={it.ehGrupo ? styles.grupo : ""}
@@ -417,7 +465,28 @@ export const Prancha: React.FC = () => {
   return (
     <div className={`${styles.app} ${noite ? styles.noite : ""} ${familia ? styles.modoFamilia : ""}`}>
       {/* barra fixa */}
-      <div className={styles.barra}>
+      {familia ? (
+        <div className={styles.barraFamilia}>
+          {tela ? (
+            <button type="button" className={styles.inicio} onClick={() => (grupoId ? (setGrupoId(null), setPagina(0)) : irPara(null))}>
+              <span aria-hidden>⌂</span> {grupoId ? "Voltar" : "Início"}
+            </button>
+          ) : <span />}
+          <div className={styles.tituloFamilia}>
+            <strong>✏️ Organizar a prancha</strong>
+            <span>Toque num card para trocar foto ou frase · arraste para mudar de lugar</span>
+          </div>
+          <span className={styles.nuvem} data-status={nuvem}>
+            {{ local: "📱 Só neste aparelho", salvo: "☁️ Salvo na nuvem", enviando: "☁️ Enviando…", pendente: "⏳ Aguardando internet", erro: "⚠️ Não sincronizou" }[nuvem]}
+          </span>
+          <button type="button" className={!token ? styles.primario : ""} onClick={() => setNuvemAberta(true)}>
+            {token ? "Link do tablet" : "☁️ Salvar na nuvem"}
+          </button>
+          <button type="button" onClick={() => setConfigAberta(true)}>Configurações</button>
+          <button type="button" className={styles.primario} onClick={() => { setFamilia(false); setConfigAberta(false); }}>✓ Concluir</button>
+        </div>
+      ) : (
+        <div className={styles.barra}>
         {tela ? (
           <button type="button" className={styles.inicio} onClick={() => (parteDor ? setParteDor(null) : grupoId ? (setGrupoId(null), setPagina(0)) : irPara(null))}>
             <span aria-hidden>⌂</span> {parteDor || grupoId ? "Voltar" : "Início"}
@@ -442,19 +511,6 @@ export const Prancha: React.FC = () => {
           {familia ? "✓" : "⚙"}
         </button>
       </div>
-
-      {familia && (
-        <div className={styles.faixaFamilia}>
-          <span><strong>Modo família.</strong> Toque num item para trocar a foto ou a frase. “Adicionar” abre a câmera.</span>
-          <span className={styles.nuvem} data-status={nuvem}>
-            {{ local: "📱 Só neste aparelho", salvo: "☁️ Salvo na nuvem", enviando: "☁️ Enviando…", pendente: "⏳ Aguardando internet", erro: "⚠️ Não sincronizou" }[nuvem]}
-          </span>
-          <button type="button" className={!token ? styles.primario : ""} onClick={() => setNuvemAberta(true)}>
-            {token ? "Link do tablet" : "☁️ Salvar na nuvem"}
-          </button>
-          <button type="button" onClick={() => setConfigAberta(true)}>Configurações</button>
-          <button type="button" onClick={() => { setFamilia(false); setConfigAberta(false); }}>Sair</button>
-        </div>
       )}
 
       {tela && (
