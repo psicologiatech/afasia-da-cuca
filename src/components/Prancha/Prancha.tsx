@@ -270,7 +270,13 @@ export const Prancha: React.FC = () => {
   }) => (
     <button type="button" className={`${styles.botao} ${oculto ? styles.oculto : ""} ${classe || ""}`} style={cor ? { borderColor: cor } : undefined} onClick={onClick}>
       <span className={styles.imagem} style={cor && !foto ? { background: cor + "22" } : undefined}>
-        {foto ? <img src={foto} alt="" /> : <span className={styles.emoji} aria-hidden>{emoji}</span>}
+        {foto ? (
+          <>
+            {/* fundo desfocado da própria foto preenche o espaço; a foto aparece inteira por cima */}
+            <img src={foto} alt="" className={styles.fundoFoto} aria-hidden />
+            <img src={foto} alt="" className={styles.fotoInteira} />
+          </>
+        ) : <span className={styles.emoji} aria-hidden>{emoji}</span>}
       </span>
       <span className={styles.rotulo}>{rotulo}</span>
       {editavel && <span className={styles.lapis} aria-hidden>✎</span>}

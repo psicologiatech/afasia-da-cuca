@@ -51,21 +51,21 @@ export async function salvarDados(dados: DadosPrancha): Promise<boolean> {
 
 // ---------- Fotos ----------
 
-// Corta a foto no centro (quadrada), reduz para 640px e comprime.
-export function prepararFoto(arquivo: File, lado = 640): Promise<string> {
+// Reduz a foto para no máximo 800 px no lado maior, sem cortar, e comprime.
+export function prepararFoto(arquivo: File, maior = 800): Promise<string> {
   return new Promise((ok, erro) => {
     const url = URL.createObjectURL(arquivo);
     const img = new Image();
     img.onload = () => {
-      const menor = Math.min(img.naturalWidth, img.naturalHeight);
-      const sx = (img.naturalWidth - menor) / 2;
-      const sy = (img.naturalHeight - menor) / 2;
+      const escala = Math.min(1, maior / Math.max(img.naturalWidth, img.naturalHeight));
       const canvas = document.createElement("canvas");
-      canvas.width = lado;
-      canvas.height = lado;
+      canvas.width = Math.round(img.naturalWidth * escala);
+      canvas.height = Math.round(img.naturalHeight * escala);
       const ctx = canvas.getContext("2d");
       if (!ctx) { URL.revokeObjectURL(url); erro(new Error("Sem canvas")); return; }
-      ctx.drawImage(img, sx, sy, menor, menor, 0, 0, lado, lado);
+      ctx.fillStyle = "#ffffff"; // fundo branco para imagens com transparência (PNG)
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       URL.revokeObjectURL(url);
       ok(canvas.toDataURL("image/jpeg", 0.82));
     };
