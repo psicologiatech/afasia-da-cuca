@@ -1,0 +1,71 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// BANCO DE DADOS DO APP CONVERSA APOIADA
+// ==========================================
+
+// Categorias e Subcategorias (ex: Comida -> Doce / Salgada, Pessoas -> Filhos / Noras)
+model Categoria {
+  id        String       @id @default(uuid())
+  nome      String
+  icone     String?      // Emoji ou ícone representativo
+  parentId  String?      // Se for subcategoria, aponta para a categoria pai
+  parent    Categoria?   @relation("Subcategorias", fields: [parentId], references: [id], onDelete: Cascade)
+  subs      Categoria[]  @relation("Subcategorias")
+  itens     Item[]
+  ordem     Int          @default(0)
+  criadoEm  DateTime     @default(now())
+
+  @@map("categorias")
+}
+
+// Tabela simples de itens do DB
+// id do item, nome do item, imagem do item
+model Item {
+  id          String    @id @default(uuid())
+  nome        String    // Nome falado e exibido (ex: "Sopa", "Água", "Café", "Pudim", "João")
+  imagem      String    // URL da imagem ou emoji grande representativo
+  categoriaId String
+  categoria   Categoria @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
+  ordem       Int       @default(0)
+  criadoEm    DateTime  @default(now())
+
+  @@map("itens")
+}
+
+// ==========================================
+// REGISTROS DA ENTREVISTA (LEGADO/PREPARATÓRIO)
+// ==========================================
+
+model Familia {
+  id        String     @id @default(uuid())
+  token     String     @unique
+  nome      String
+  criadoEm  DateTime   @default(now())
+  respostas Resposta[]
+
+  @@map("familias")
+}
+
+model Resposta {
+  id               String   @id
+  familiaId        String
+  familia          Familia  @relation(fields: [familiaId], references: [id], onDelete: Cascade)
+  nomeRespondente  String
+  relacao          String
+  pessoa           String?
+  papel            String
+  consentimento    Boolean  @default(true)
+  respostas        Json
+  criadoEm         DateTime @default(now())
+  atualizadoEm     DateTime @updatedAt
+
+  @@map("respostas")
+}

@@ -1,0 +1,42 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--accent);
+}
+
+.title {
+  margin-top: 0;
+  margin-bottom: 0.4em;
+  font-size: 1.25rem;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+
+.tagLang {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.tagMotor {
+  background: var(--warm-soft);
+  color: var(--warm);
+}
+
+.tagPlan {
+  background: var(--gold-soft);
+  color: var(--gold);
+}

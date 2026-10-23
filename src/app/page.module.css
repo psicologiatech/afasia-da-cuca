@@ -1,0 +1,70 @@
+.section {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+.grid3 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .grid3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.grid2 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .grid2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.list {
+  padding-left: 1.2em;
+  margin: 0 0 1em;
+}
+
+.list li {
+  margin-bottom: 0.4em;
+}
+
+.btnPrimary {
+  display: inline-block;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 12px 24px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.btnPrimary:hover {
+  opacity: 0.9;
+}
+
+.ctaBox {
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-top: 24px;
+  text-align: center;
+}

@@ -1,0 +1,307 @@
+.container {
+  padding: 16px 16px 60px;
+  max-width: 768px; /* Tablet e Celular friendly */
+  margin: 0 auto;
+}
+
+/* =========================================
+   TOPO: Teclado Bem Grande e Gerenciar DB
+   ========================================= */
+.topHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0 20px;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 20px;
+}
+
+.btnTeclado {
+  flex: 1;
+  font: inherit;
+  font-family: var(--font-fraunces), serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 3px solid var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 4px 14px rgba(31, 111, 98, 0.3);
+  transition: transform 0.15s ease;
+  user-select: none;
+}
+
+.btnTeclado:active {
+  transform: scale(0.97);
+}
+
+.btnGerenciar {
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 18px 16px;
+  border-radius: 18px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  user-select: none;
+  min-width: 90px;
+}
+
+.btnGerenciar:active {
+  background: var(--surface-2);
+}
+
+/* =========================================
+   RESPOSTAS RÁPIDAS (SIM / NÃO)
+   ========================================= */
+.quickRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.btnQuick {
+  font: inherit;
+  font-family: var(--font-fraunces), serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  padding: 20px 12px;
+  border-radius: 18px;
+  border: 3px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: var(--shadow);
+  user-select: none;
+}
+
+.btnQuick:active {
+  transform: scale(0.97);
+}
+
+.btnSim {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.btnNao {
+  background: var(--warm);
+  color: #ffffff;
+}
+
+/* =========================================
+   BARRA DE NAVEGAÇÃO INTERNA / VOLTAR
+   ========================================= */
+.breadcrumbBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.btnVoltar {
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding: 14px 20px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow);
+}
+
+.subTitle {
+  font-family: var(--font-fraunces), serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+}
+
+/* =========================================
+   GRADE DOS TÓPICOS FAVORITOS (HOME)
+   ========================================= */
+.topicsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.topicCard {
+  background: var(--surface);
+  border: 3px solid var(--line);
+  border-radius: 20px;
+  padding: 24px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, border-color 0.2s ease;
+  user-select: none;
+  min-height: 96px;
+}
+
+.topicCard:active {
+  transform: scale(0.98);
+  border-color: var(--accent);
+}
+
+.topicContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topicIcon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.topicName {
+  font-family: var(--font-fraunces), serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.topicArrow {
+  font-size: 1.8rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* =========================================
+   GRADE DE ITENS E SUBCATEGORIAS
+   ========================================= */
+.itemsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.itemBtn {
+  background: var(--surface);
+  border: 3px solid var(--line);
+  border-radius: 20px;
+  padding: 24px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  box-shadow: var(--shadow);
+  user-select: none;
+  min-height: 140px;
+  transition: transform 0.15s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.itemBtn:active {
+  transform: scale(0.96);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.itemEmoji {
+  font-size: 3.4rem;
+  line-height: 1;
+}
+
+.itemName {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+/* =========================================
+   ESCALA DE DOR (0 A 10)
+   ========================================= */
+.painScaleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+@media (min-width: 600px) {
+  .painScaleGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.painBtn {
+  font: inherit;
+  font-family: var(--font-fraunces), serif;
+  font-size: 2rem;
+  font-weight: 700;
+  padding: 22px 10px;
+  border-radius: 18px;
+  border: 3px solid transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: var(--shadow);
+  color: #ffffff;
+  user-select: none;
+}
+
+.painBtn:active {
+  transform: scale(0.95);
+}
+
+.painSub {
+  font-family: var(--font-atkinson), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* Feedback de fala */
+.speakingNotice {
+  background: var(--accent);
+  color: #ffffff;
+  padding: 16px 20px;
+  border-radius: 16px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.02); }
+}

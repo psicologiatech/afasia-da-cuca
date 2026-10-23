@@ -1,0 +1,141 @@
+.section {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.metaFields {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+@media (min-width: 720px) {
+  .metaFields {
+    grid-template-columns: 2fr 1.5fr 1fr;
+    align-items: end;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field span {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.btnPrimary {
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 11px 18px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  transition: opacity 0.2s;
+  width: 100%;
+}
+
+.btnPrimary:hover {
+  opacity: 0.9;
+}
+
+.btnSecondary {
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.2s;
+}
+
+.btnSecondary:hover {
+  border-color: var(--accent);
+}
+
+.linkOut {
+  word-break: break-all;
+  font-family: ui-monospace, monospace;
+  font-size: 0.95rem;
+  background: var(--surface-2);
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin: 12px 0;
+  border: 1px dashed var(--line);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.historyList {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historyItem {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (min-width: 600px) {
+  .historyItem {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.savedMsg {
+  font-size: 0.9rem;
+  color: var(--accent);
+  font-weight: 700;
+  margin-top: 8px;
+  min-height: 1.2em;
+}
+
+.errorMsg {
+  color: var(--warm);
+  font-weight: 700;
+  margin-top: 8px;
+}

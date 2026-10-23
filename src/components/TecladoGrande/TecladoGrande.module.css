@@ -1,0 +1,198 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: var(--surface);
+  border-top: 3px solid var(--accent);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 16px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.35);
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-family: var(--font-fraunces), serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnClose {
+  font: inherit;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 2px solid var(--line);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* Visor de Texto Digitado */
+.display {
+  background: var(--surface-2);
+  border: 3px solid var(--accent);
+  border-radius: 16px;
+  padding: 16px 20px;
+  font-size: 2rem;
+  font-weight: 700;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  word-break: break-word;
+  color: var(--ink);
+}
+
+.placeholder {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 1.4rem;
+  font-style: italic;
+}
+
+/* Botões de Ação do Visor */
+.actionsBar {
+  display: flex;
+  gap: 12px;
+}
+
+.btnSpeak {
+  flex: 2;
+  font: inherit;
+  font-size: 1.6rem;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: var(--accent);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 14px rgba(31, 111, 98, 0.4);
+}
+
+.btnSpeak:active {
+  transform: scale(0.98);
+}
+
+.btnBackspace {
+  flex: 1;
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--warm-soft);
+  color: var(--warm);
+  cursor: pointer;
+}
+
+.btnClear {
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* Grade do Teclado Grande */
+.keyboardGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 600px) {
+  .keyboardGrid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+  }
+}
+
+.keyBtn {
+  font: inherit;
+  font-family: var(--font-atkinson), sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  padding: 18px 8px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  user-select: none;
+  transition: background-color 0.1s, transform 0.1s;
+}
+
+.keyBtn:active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  transform: scale(0.95);
+}
+
+.keySpace {
+  grid-column: span 3;
+  font-size: 1.2rem;
+  background: var(--surface-2);
+}
+
+.keySim {
+  grid-column: span 2;
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  font-size: 1.3rem;
+}
+
+.keyNao {
+  grid-column: span 2;
+  background: var(--warm);
+  color: #ffffff;
+  border-color: var(--warm);
+  font-size: 1.3rem;
+}

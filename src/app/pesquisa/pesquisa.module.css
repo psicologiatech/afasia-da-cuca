@@ -1,0 +1,82 @@
+.section {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.grid3 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .grid3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.grid2 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .grid2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stat {
+  font-family: var(--font-fraunces), serif;
+  font-size: 2.4rem;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.statLabel {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.tableScroll {
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.table th {
+  background: var(--surface-2);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.cleanList {
+  padding-left: 1.2em;
+  margin: 0 0 1em;
+}
+
+.cleanList li {
+  margin-bottom: 0.4em;
+}

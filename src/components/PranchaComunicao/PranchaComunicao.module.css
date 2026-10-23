@@ -1,0 +1,278 @@
+.container {
+  padding: 24px 0 60px;
+}
+
+/* Faixa de Fala Imediata (Sim / Não) */
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 600px) {
+  .quickActions {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.quickBtn {
+  font: inherit;
+  font-family: var(--font-fraunces), serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 20px 16px;
+  border-radius: var(--radius);
+  border: 3px solid transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, filter 0.2s ease;
+  user-select: none;
+}
+
+.quickBtn:active {
+  transform: scale(0.97);
+}
+
+.btnSim {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: #17544a;
+}
+
+.btnNao {
+  background: var(--warm);
+  color: #ffffff;
+  border-color: #8c3b17;
+}
+
+.btnObrigado {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.btnAjuda {
+  background: var(--gold);
+  color: #ffffff;
+  border-color: #7b590c;
+}
+
+/* Barra de Montagem de Frases e Digitação */
+.speechBar {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+}
+
+.speechDisplay {
+  min-height: 52px;
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  border: 1px dashed var(--line);
+  margin-bottom: 14px;
+}
+
+.wordToken {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 1.1rem;
+}
+
+.placeholder {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 1.05rem;
+  font-style: italic;
+}
+
+.controlsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.btnSpeak {
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+
+.btnSpeak:hover {
+  opacity: 0.9;
+}
+
+.btnControl {
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.btnControl:hover {
+  border-color: var(--accent);
+}
+
+.customInput {
+  flex: 1;
+  min-width: 200px;
+  font: inherit;
+  font-size: 1rem;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.customInput:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* Categorias de Abas */
+.categoryTabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.categoryTab {
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.activeTab {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+/* Grid de Cartões da Prancha */
+.boardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (min-width: 600px) {
+  .boardGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .boardGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.cardItem {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, border-color 0.2s ease, background-color 0.2s ease;
+  user-select: none;
+  min-height: 120px;
+}
+
+.cardItem:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.cardItem:active {
+  transform: scale(0.97);
+  background: var(--accent-soft);
+}
+
+.cardEmoji {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.cardText {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+/* Banner de Apoio Familiar e Entrevista */
+.interviewBanner {
+  margin-top: 48px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 720px) {
+  .interviewBanner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

@@ -1,0 +1,21 @@
+.callout {
+  border-left: 4px solid var(--accent);
+  background: var(--accent-soft);
+  padding: 16px 20px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 20px 0;
+}
+
+.warm {
+  border-color: var(--warm);
+  background: var(--warm-soft);
+}
+
+.gold {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
