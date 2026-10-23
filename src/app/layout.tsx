@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Atkinson_Hyperlegible, Fraunces } from "next/font/google";
 import "@/styles/globals.css";
 
@@ -20,6 +20,16 @@ export const metadata: Metadata = {
   title: "Conversa Apoiada — Comunicação e Apoio Pós-AVC",
   description:
     "Aplicativo e entrevista com famílias para desenhar apoio de comunicação alternativa para pessoas que tiveram AVC.",
+  applicationName: "Conversa Apoiada",
+  appleWebApp: { capable: true, title: "Prancha", statusBarStyle: "black-translucent" },
+  icons: { icon: "/icons/icone-192.png", apple: "/icons/apple-touch-icon.png" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1f6f62",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

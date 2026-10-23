@@ -358,3 +358,5 @@
 .mais .rotulo, .adicionar .rotulo { flex: 0 0 auto; }
 .acoesPessoa .ligar { background: #1e8e3e; color: #fff; }
 .acoesPessoa .fechar { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+
+.listaAjuda { padding-left: 1.2em; display: grid; gap: 8px; margin: 0 0 12px; }

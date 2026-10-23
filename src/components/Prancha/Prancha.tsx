@@ -39,6 +39,9 @@ export const Prancha: React.FC = () => {
   const [nuvem, setNuvem] = useState<StatusNuvem>("local");
   const [pedirPin, setPedirPin] = useState(false);
   const [grupoId, setGrupoId] = useState<string | null>(null);
+  const [instalar, setInstalar] = useState<{ prompt: () => Promise<void> } | null>(null);
+  const [instalado, setInstalado] = useState(false);
+  const [ajudaInstalar, setAjudaInstalar] = useState(false);
   const [nuvemAberta, setNuvemAberta] = useState(false);
   const tokenRef = useRef<string | null>(null);
   const dadosRef = useRef(dados);
@@ -150,6 +153,22 @@ export const Prancha: React.FC = () => {
     const id = setInterval(calcular, 60_000);
     return () => clearInterval(id);
   }, [dados.config.tema]);
+
+  // app instalável: guarda o app no aparelho e oferece "Instalar" quando o navegador permite
+  useEffect(() => {
+    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+      navigator.serviceWorker.register("/sw.js").catch(() => { /* segue funcionando sem */ });
+    }
+    const jaInstalado = () =>
+      matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setInstalado(jaInstalado());
+    const aoOferecer = (e: Event) => { e.preventDefault(); setInstalar(e as unknown as { prompt: () => Promise<void> }); };
+    const aoInstalar = () => { setInstalado(true); setInstalar(null); };
+    window.addEventListener("beforeinstallprompt", aoOferecer);
+    window.addEventListener("appinstalled", aoInstalar);
+    return () => { window.removeEventListener("beforeinstallprompt", aoOferecer); window.removeEventListener("appinstalled", aoInstalar); };
+  }, []);
 
   // manter a tela acesa enquanto a prancha está aberta
   useEffect(() => {
@@ -483,6 +502,9 @@ export const Prancha: React.FC = () => {
           <button type="button" className={!token ? styles.primario : ""} onClick={() => setNuvemAberta(true)}>
             {token ? "Link do tablet" : "☁️ Salvar na nuvem"}
           </button>
+          {!instalado && (
+            <button type="button" onClick={() => (instalar ? void instalar.prompt().then(() => setInstalar(null)) : setAjudaInstalar(true))}>📲 Instalar</button>
+          )}
           <button type="button" onClick={() => setConfigAberta(true)}>Configurações</button>
           <button type="button" className={styles.primario} onClick={() => { setFamilia(false); setConfigAberta(false); }}>✓ Concluir</button>
         </div>
@@ -568,6 +590,22 @@ export const Prancha: React.FC = () => {
           }}
           onFechar={() => setNuvemAberta(false)}
         />
+      )}
+
+      {ajudaInstalar && (
+        <div className={styles.modalFundo} onClick={() => setAjudaInstalar(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Como instalar">
+            <h2>📲 Instalar a prancha</h2>
+            <p>Instalada, a prancha abre em tela cheia, com ícone próprio, e funciona mesmo sem internet.</p>
+            <ul className={styles.listaAjuda}>
+              <li><strong>Tablet ou celular Android (Chrome):</strong> toque nos três pontinhos ⋮ no canto de cima e em <em>Instalar app</em> ou <em>Adicionar à tela inicial</em>.</li>
+              <li><strong>iPad ou iPhone (Safari):</strong> toque em <em>Compartilhar</em> (quadrado com seta) e em <em>Adicionar à Tela de Início</em>. Depois, abra pelo ícone e cole o link da família em <em>Salvar na nuvem → Já tenho o link</em>.</li>
+              <li><strong>Computador (Chrome ou Edge):</strong> clique no ícone de instalar na barra de endereço.</li>
+            </ul>
+            <p className={styles.dica}>Abra pelo link da família antes de instalar, para o tablet já ficar ligado à prancha certa.</p>
+            <div className={styles.rodapeModal}><span className={styles.espaco} /><button type="button" className={styles.primario} onClick={() => setAjudaInstalar(false)}>Entendi</button></div>
+          </div>
+        </div>
       )}
 
       {config && <Configuracoes dados={dados} onMudar={atualizar} onFechar={() => setConfigAberta(false)} />}
@@ -836,6 +874,15 @@ const SalvarNaNuvem: React.FC<{
   const [msg, setMsg] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  const [colar, setColar] = useState(false);
+  const [linkColado, setLinkColado] = useState("");
+
+  const usarLink = () => {
+    const m = /[?&]t=([A-Za-z0-9_-]{10,64})/.exec(linkColado.trim());
+    if (!m) { setMsg("Cole o link inteiro, que termina em ?t=…"); return; }
+    try { localStorage.setItem("conversa-prancha-token", m[1]); } catch { /* */ }
+    location.href = `/prancha?t=${m[1]}`;
+  };
 
   useEffect(() => { try { setCodigo(localStorage.getItem("conversa-codigo-acesso") || ""); } catch { /* */ } }, []);
 
@@ -884,6 +931,16 @@ const SalvarNaNuvem: React.FC<{
       <form className={styles.modal} onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); void salvar(); }} role="dialog" aria-label="Salvar na nuvem">
         <h2>☁️ Salvar na nuvem</h2>
         <p>Assim as fotos e frases deste aparelho ficam guardadas com segurança e aparecem no tablet e no celular da família.</p>
+        <button type="button" onClick={() => setColar((c) => !c)}>{colar ? "Criar uma prancha nova" : "Já tenho o link da família"}</button>
+        {colar && (
+          <div className={styles.linha} style={{ marginTop: 10 }}>
+            <label className={styles.campo} style={{ flex: 1 }}>
+              <span>Cole aqui o link da prancha</span>
+              <input id="nuvem-link" type="url" value={linkColado} onChange={(e) => setLinkColado(e.target.value)} placeholder="https://afasia-da-cuca.vercel.app/prancha?t=…" />
+            </label>
+            <button type="button" className={styles.primario} onClick={usarLink}>Abrir</button>
+          </div>
+        )}
         <label className={styles.campo}>
           <span>Código da equipe</span>
           <input id="nuvem-codigo" type="password" autoComplete="off" value={codigo} onChange={(e) => setCodigo(e.target.value)} />
