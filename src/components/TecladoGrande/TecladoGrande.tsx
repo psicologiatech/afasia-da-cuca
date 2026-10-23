@@ -16,8 +16,29 @@ const LETRAS = [
   "Y", "Z", "Ç", ".", ",", "?",
 ];
 
+// Mesma disposição do teclado do celular (QWERTY), com Ç ao lado do L
+const LETRAS_CELULAR = [
+  "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
+  "A", "S", "D", "F", "G", "H", "J", "K", "L", "Ç",
+  "Z", "X", "C", "V", "B", "N", "M", ".", ",", "?",
+];
+
+type Disposicao = "alfabetica" | "celular";
+const CHAVE_DISPOSICAO = "conversa-teclado-disposicao";
+
 export const TecladoGrande: React.FC<TecladoGrandeProps> = ({ aberto, onFechar }) => {
   const [texto, setTexto] = useState("");
+  const [disposicao, setDisposicao] = useState<Disposicao>("alfabetica");
+
+  useEffect(() => {
+    try { if (localStorage.getItem(CHAVE_DISPOSICAO) === "celular") setDisposicao("celular"); } catch { /* */ }
+  }, []);
+
+  const trocarDisposicao = () => {
+    const nova: Disposicao = disposicao === "alfabetica" ? "celular" : "alfabetica";
+    setDisposicao(nova);
+    try { localStorage.setItem(CHAVE_DISPOSICAO, nova); } catch { /* */ }
+  };
 
   const falar = useCallback((mensagem: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -70,9 +91,14 @@ export const TecladoGrande: React.FC<TecladoGrandeProps> = ({ aberto, onFechar }
           <h2 className={styles.title}>
             <span>⌨️</span> Teclado Grande
           </h2>
+          <div className={styles.topAcoes}>
+          <button type="button" className={styles.btnTrocar} onClick={trocarDisposicao} aria-label="Trocar a ordem das letras">
+            {disposicao === "alfabetica" ? "⌨️ Teclado do celular" : "🔤 Ordem alfabética"}
+          </button>
           <button type="button" className={styles.btnClose} onClick={onFechar}>
             ✕ Fechar
           </button>
+          </div>
         </div>
 
         {/* Visor Enorme */}
@@ -94,8 +120,8 @@ export const TecladoGrande: React.FC<TecladoGrandeProps> = ({ aberto, onFechar }
         </div>
 
         {/* Letras Grandes */}
-        <div className={styles.keyboardGrid}>
-          {LETRAS.map((letra) => (
+        <div className={`${styles.keyboardGrid} ${disposicao === "celular" ? styles.gridCelular : ""}`}>
+          {(disposicao === "celular" ? LETRAS_CELULAR : LETRAS).map((letra) => (
             <button
               key={letra}
               type="button"

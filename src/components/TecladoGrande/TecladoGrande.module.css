@@ -36,6 +36,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.topAcoes { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.btnTrocar {
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+  color: var(--ink);
+  cursor: pointer;
 }
 
 .title {
@@ -228,4 +244,12 @@
   .keyBtn { font-size: clamp(2rem, 7vh, 3.4rem); padding: 0; min-height: 0; }
   .keySpace { grid-column: span 4; font-size: clamp(1.2rem, 3vh, 1.8rem); }
   .keySim, .keyNao { grid-column: span 3; font-size: clamp(1.3rem, 3.4vh, 2rem); }
+}
+
+/* Teclado do celular: 10 teclas por linha também em pé, para manter as fileiras Q-P, A-Ç, Z-? */
+.gridCelular { grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; }
+.gridCelular .keyBtn:not(.keySpace):not(.keySim):not(.keyNao) { font-size: clamp(1.3rem, 5vw, 1.8rem); padding: 16px 2px; }
+@media (orientation: landscape) and (min-width: 700px) {
+  .gridCelular { gap: 10px; }
+  .gridCelular .keyBtn:not(.keySpace):not(.keySim):not(.keyNao) { font-size: clamp(2rem, 7vh, 3.4rem); padding: 0; }
 }
