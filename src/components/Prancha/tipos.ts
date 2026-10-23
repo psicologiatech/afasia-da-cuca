@@ -12,6 +12,8 @@ export interface ItemPrancha {
   fotoBlob?: string; // caminho da foto no Vercel Blob privado (quando a prancha está ligada à nuvem)
   oculto?: boolean; // escondido da tela, mas não apagado
   personalizado?: boolean; // criado pela família (pode ser excluído)
+  ehGrupo?: boolean; // em Pessoas: um grupo (ex.: "Noras") que abre as pessoas dele
+  grupo?: string; // em Pessoas: id do grupo a que a pessoa pertence
 }
 
 export interface TelaPrancha {

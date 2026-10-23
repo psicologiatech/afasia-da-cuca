@@ -26,7 +26,12 @@ export function guardarToken(token: string) {
   try { localStorage.setItem(CHAVE_TOKEN, token); } catch { /* */ }
 }
 
-export const linkDaPrancha = (token: string) => `${location.origin}/prancha?t=${encodeURIComponent(token)}`;
+// Endereços de deploy da Vercel (…-projetos.vercel.app) pedem login; o link da família usa sempre o domínio público.
+const DOMINIO_PUBLICO = process.env.NEXT_PUBLIC_APP_URL || "https://afasia-da-cuca.vercel.app";
+export const linkDaPrancha = (token: string) => {
+  const base = location.hostname.endsWith(".vercel.app") ? DOMINIO_PUBLICO.replace(/\/$/, "") : location.origin;
+  return `${base}/prancha?t=${encodeURIComponent(token)}`;
+};
 
 // Cria a prancha na nuvem (código da equipe + PIN escolhido) e devolve o token do link.
 export async function criarNaNuvem(codigo: string, nome: string, pin: string): Promise<string> {

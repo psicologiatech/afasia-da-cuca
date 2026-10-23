@@ -279,7 +279,7 @@
 .dica { font-size: 0.9rem; color: var(--muted); margin: 0; }
 .campo { display: block; margin: 10px 0; }
 .campo span { display: block; font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
-.campo input {
+.campo input, .campo select {
   width: 100%; font: inherit; font-size: 1.05rem;
   padding: 10px 12px; border-radius: 10px;
   border: 1px solid var(--line); background: var(--bg); color: var(--ink);
@@ -305,3 +305,21 @@
 
 .linkTablet { word-break: break-all; background: var(--surface-2); padding: 10px 12px; border-radius: 10px; font-size: 0.95rem; user-select: all; }
 .botaoLink { font: inherit; font-size: 1rem; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; }
+
+/* ordem e grupos */
+.celula { position: relative; min-height: 0; display: flex; }
+.celula > .botao { flex: 1; }
+.ordem {
+  position: absolute; left: 10px; right: 10px; top: 10px;
+  display: flex; justify-content: space-between; gap: 8px; pointer-events: none;
+}
+.ordem button {
+  pointer-events: auto; font: inherit; font-size: 1.2rem; font-weight: 700;
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid var(--accent); background: var(--surface); color: var(--ink); cursor: pointer;
+}
+.ordem button:disabled { opacity: 0.25; cursor: default; }
+.celula .lapis { top: 16px; right: auto; left: 50%; transform: translateX(-50%); }
+/* grupo: cartas empilhadas, para parecer "vários" */
+.grupo { box-shadow: 6px 6px 0 -2px var(--surface), 6px 6px 0 0 var(--line), 12px 12px 0 -2px var(--surface), 12px 12px 0 0 var(--line); margin: 0 12px 12px 0; }
+.grupo .rotulo::after { content: " ›"; }

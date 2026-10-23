@@ -38,6 +38,7 @@ export const Prancha: React.FC = () => {
   const [token, setToken] = useState<string | null>(null);
   const [nuvem, setNuvem] = useState<StatusNuvem>("local");
   const [pedirPin, setPedirPin] = useState(false);
+  const [grupoId, setGrupoId] = useState<string | null>(null);
   const [nuvemAberta, setNuvemAberta] = useState(false);
   const tokenRef = useRef<string | null>(null);
   const dadosRef = useRef(dados);
@@ -187,7 +188,7 @@ export const Prancha: React.FC = () => {
   const tela = dados.telas.find((tl) => tl.id === telaId) || null;
 
   const irPara = (id: string | null) => {
-    setTelaId(id); setPagina(0); setParteDor(null); setPessoa(null);
+    setTelaId(id); setPagina(0); setParteDor(null); setPessoa(null); setGrupoId(null);
   };
 
   const abrirTela = (tl: TelaPrancha) => {
@@ -203,6 +204,12 @@ export const Prancha: React.FC = () => {
   };
 
   const tocarItem = (tl: TelaPrancha, it: ItemPrancha) => {
+    if (it.ehGrupo) {
+      if (!familia && !podeTocar()) return;
+      if (!familia) falar(t(it.fala || it.rotulo), dados.config.velocidadeVoz);
+      setGrupoId(it.id); setPagina(0);
+      return;
+    }
     if (familia) { setEdicao({ telaId: tl.id, item: { ...it }, novo: false }); return; }
     if (!podeTocar()) return;
     if (tl.tipo === "pessoas") { dizer(t(it.fala) || it.rotulo, it.emoji, it.foto, true); setPessoa(it); return; }
@@ -232,8 +239,8 @@ export const Prancha: React.FC = () => {
 
   // ----- paginação: até 8 por tela (4 no modo simples) -----
   const porPagina = dados.config.modoSimples ? 4 : 8;
-  function paginar<T>(lista: T[]): { itens: T[]; temMais: boolean; total: number } {
-    const extra = familia ? 1 : 0; // espaço do "Adicionar"
+  function paginar<T>(lista: T[], extra = familia ? 1 : 0): { itens: T[]; temMais: boolean; total: number } {
+    // "extra": espaços dos botões de adicionar no modo família
     if (lista.length + extra <= porPagina) return { itens: lista, temMais: false, total: 1 };
     const cabe = porPagina - 1 - extra;
     const total = Math.ceil(lista.length / cabe);
@@ -256,11 +263,39 @@ export const Prancha: React.FC = () => {
   };
   const excluirItem = (telaIdEd: string, id: string) => {
     const antigo = dados.telas.find((tl) => tl.id === telaIdEd)?.itens.find((i) => i.id === id);
-    atualizar({ ...dados, telas: dados.telas.map((tl) => (tl.id === telaIdEd ? { ...tl, itens: tl.itens.filter((i) => i.id !== id) } : tl)) }, antigo?.fotoBlob ? [antigo.fotoBlob] : []);
+    // ao excluir um grupo, as pessoas dele voltam para a tela de Pessoas
+    const telas = dados.telas.map((tl) => (tl.id !== telaIdEd ? tl : {
+      ...tl,
+      itens: tl.itens.filter((i) => i.id !== id).map((i) => (i.grupo === id ? { ...i, grupo: undefined } : i)),
+    }));
+    atualizar({ ...dados, telas }, antigo?.fotoBlob ? [antigo.fotoBlob] : []);
+    if (grupoId === id) setGrupoId(null);
     setEdicao(null);
   };
-  const novoItem = (tl: TelaPrancha) => {
-    setEdicao({ telaId: tl.id, novo: true, item: { id: novoId(), rotulo: "", fala: "", personalizado: true, emoji: tl.tipo === "pessoas" ? "🙂" : "⭐" } });
+  const novoItem = (tl: TelaPrancha, ehGrupo = false) => {
+    setEdicao({
+      telaId: tl.id, novo: true,
+      item: {
+        id: novoId(), rotulo: "", fala: "", personalizado: true,
+        emoji: ehGrupo ? "👪" : tl.tipo === "pessoas" ? "🙂" : "⭐",
+        ...(ehGrupo ? { ehGrupo: true } : grupoId ? { grupo: grupoId } : {}),
+      },
+    });
+  };
+  // move um item uma posição para trás (-1) ou para frente (+1), entre os que aparecem na mesma tela
+  const moverItem = (telaIdMv: string, id: string, direcao: -1 | 1) => {
+    const tl = dados.telas.find((x) => x.id === telaIdMv);
+    if (!tl) return;
+    const alvo = tl.itens.find((i) => i.id === id);
+    if (!alvo) return;
+    const vizinhos = tl.itens.map((i, idx) => ({ i, idx })).filter(({ i }) => (i.grupo || null) === (alvo.grupo || null));
+    const pos = vizinhos.findIndex(({ i }) => i.id === id);
+    const outro = vizinhos[pos + direcao];
+    if (!outro) return;
+    const itens = [...tl.itens];
+    const a = vizinhos[pos].idx, b = outro.idx;
+    [itens[a], itens[b]] = [itens[b], itens[a]];
+    atualizar({ ...dados, telas: dados.telas.map((x) => (x.id === telaIdMv ? { ...x, itens } : x)) });
   };
 
   // ---------- telas ----------
@@ -282,6 +317,20 @@ export const Prancha: React.FC = () => {
       {editavel && <span className={styles.lapis} aria-hidden>✎</span>}
       {oculto && <span className={styles.seloOculto}>escondido</span>}
     </button>
+  );
+
+  // no modo família, cada card ganha setas para mudar a ordem (e ✎ nos grupos)
+  const Celula = ({ telaIdC, it, primeiro, ultimo, children }: { telaIdC: string; it: ItemPrancha; primeiro: boolean; ultimo: boolean; children: React.ReactNode }) => (
+    <div className={styles.celula}>
+      {children}
+      {familia && (
+        <div className={styles.ordem}>
+          <button type="button" aria-label={`Mover ${it.rotulo} para antes`} disabled={primeiro} onClick={() => moverItem(telaIdC, it.id, -1)}>◀</button>
+          {it.ehGrupo && <button type="button" aria-label={`Editar o grupo ${it.rotulo}`} onClick={() => setEdicao({ telaId: telaIdC, item: { ...it }, novo: false })}>✎</button>}
+          <button type="button" aria-label={`Mover ${it.rotulo} para depois`} disabled={ultimo} onClick={() => moverItem(telaIdC, it.id, 1)}>▶</button>
+        </div>
+      )}
+    </div>
   );
 
   const Mais = ({ total }: { total: number }) => (
@@ -321,8 +370,13 @@ export const Prancha: React.FC = () => {
       </div>
     );
   } else {
-    const lista = tela.itens.filter((i) => familia || !i.oculto);
-    const pg = paginar(lista);
+    const ehPessoas = tela.tipo === "pessoas";
+    const grupoAtual = ehPessoas && grupoId ? tela.itens.find((i) => i.id === grupoId) : undefined;
+    // na tela de Pessoas: sem grupo aberto, mostra os grupos e quem não tem grupo; com grupo aberto, só as pessoas dele
+    const doContexto = tela.itens.filter((i) => !ehPessoas || (grupoAtual ? i.grupo === grupoAtual.id : !i.grupo));
+    const lista = doContexto.filter((i) => familia || !i.oculto);
+    const botoesExtra = !familia ? 0 : ehPessoas && !grupoAtual ? 2 : 1;
+    const pg = paginar(lista, botoesExtra);
     conteudo = (
       <>
         {lista.length === 0 && !familia && (
@@ -334,12 +388,24 @@ export const Prancha: React.FC = () => {
         )}
         <div className={`${styles.grade} ${dados.config.modoSimples ? styles.grade4 : ""}`}>
           {pg.itens.map((it) => (
-            <Botao key={it.id} rotulo={t(it.rotulo)} emoji={it.emoji} foto={it.foto} cor={tela.cor} oculto={it.oculto} editavel={familia} onClick={() => tocarItem(tela, it)} />
+            <Celula key={it.id} telaIdC={tela.id} it={it} primeiro={doContexto[0]?.id === it.id} ultimo={doContexto[doContexto.length - 1]?.id === it.id}>
+              <Botao
+                rotulo={t(it.rotulo)} emoji={it.emoji} foto={it.foto} cor={tela.cor} oculto={it.oculto}
+                editavel={familia && !it.ehGrupo} classe={it.ehGrupo ? styles.grupo : ""}
+                onClick={() => tocarItem(tela, it)}
+              />
+            </Celula>
           ))}
           {familia && (
             <button type="button" className={`${styles.botao} ${styles.adicionar}`} onClick={() => novoItem(tela)}>
               <span className={styles.emoji} aria-hidden>📷</span>
-              <span className={styles.rotulo}>Adicionar</span>
+              <span className={styles.rotulo}>{ehPessoas ? "Adicionar pessoa" : "Adicionar"}</span>
+            </button>
+          )}
+          {familia && ehPessoas && !grupoAtual && (
+            <button type="button" className={`${styles.botao} ${styles.adicionar}`} onClick={() => novoItem(tela, true)}>
+              <span className={styles.emoji} aria-hidden>👪</span>
+              <span className={styles.rotulo}>Novo grupo</span>
             </button>
           )}
           {pg.temMais && <Mais total={pg.total} />}
@@ -353,8 +419,8 @@ export const Prancha: React.FC = () => {
       {/* barra fixa */}
       <div className={styles.barra}>
         {tela ? (
-          <button type="button" className={styles.inicio} onClick={() => (parteDor ? setParteDor(null) : irPara(null))}>
-            <span aria-hidden>⌂</span> {parteDor ? "Voltar" : "Início"}
+          <button type="button" className={styles.inicio} onClick={() => (parteDor ? setParteDor(null) : grupoId ? (setGrupoId(null), setPagina(0)) : irPara(null))}>
+            <span aria-hidden>⌂</span> {parteDor || grupoId ? "Voltar" : "Início"}
           </button>
         ) : (
           <button type="button" className={styles.inicio} onClick={() => setTeclado(true)} aria-label="Abrir o teclado para escrever">
@@ -393,7 +459,7 @@ export const Prancha: React.FC = () => {
 
       {tela && (
         <h1 className={styles.titulo}>
-          <span aria-hidden>{tela.emoji}</span> {parteDor ? `${parteDor}. Quanto?` : tela.rotulo}
+          <span aria-hidden>{tela.emoji}</span> {parteDor ? `${parteDor}. Quanto?` : grupoId ? `${tela.rotulo} · ${tela.itens.find((i) => i.id === grupoId)?.rotulo ?? ""}` : tela.rotulo}
         </h1>
       )}
 
@@ -484,7 +550,9 @@ const EditorItem: React.FC<{
   const [confirmarExcluir, setConfirmarExcluir] = useState(false);
   const camera = useRef<HTMLInputElement>(null);
   const galeria = useRef<HTMLInputElement>(null);
-  const pessoa = tela.tipo === "pessoas";
+  const grupo = !!item.ehGrupo;
+  const pessoa = tela.tipo === "pessoas" && !grupo;
+  const grupos = tela.itens.filter((i) => i.ehGrupo);
 
   const aoEscolher = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -497,7 +565,7 @@ const EditorItem: React.FC<{
   };
 
   const falaSugerida = (rotulo: string) =>
-    pessoa ? rotulo : tela.id === "beber" || tela.id === "comer" ? `Quero ${rotulo.toLowerCase()}.` : rotulo + ".";
+    pessoa || grupo ? rotulo : tela.id === "beber" || tela.id === "comer" ? `Quero ${rotulo.toLowerCase()}.` : rotulo + ".";
 
   const salvar = () => {
     const rotulo = item.rotulo.trim();
@@ -508,7 +576,8 @@ const EditorItem: React.FC<{
   return (
     <div className={styles.modalFundo} onClick={onFechar}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Editar item">
-        <h2>{edicao.novo ? `Adicionar em “${tela.rotulo}”` : "Editar"}</h2>
+        <h2>{grupo ? (edicao.novo ? "Novo grupo" : "Editar grupo") : edicao.novo ? `Adicionar em “${tela.rotulo}”` : "Editar"}</h2>
+        {grupo && <p className={styles.dica}>Um grupo junta pessoas (ex.: Noras, Irmãos). Ao tocar nele, a tela mostra só as pessoas daquele grupo.</p>}
 
         <div className={styles.fotoEditor}>
           <div className={styles.fotoPrevia}>
@@ -519,7 +588,7 @@ const EditorItem: React.FC<{
             <button type="button" onClick={() => galeria.current?.click()} disabled={carregando}>🖼️ Escolher da galeria</button>
             {item.foto && <button type="button" onClick={() => setItem((i) => ({ ...i, foto: undefined, fotoBlob: undefined }))}>Remover foto</button>}
             <p className={styles.dica}>
-              {pessoa ? "Rosto de perto, com luz boa. Peça licença à pessoa." : "Um objeto só, bem de perto, com luz boa e fundo liso. Use as coisas reais da casa."}
+              {grupo ? "Uma foto das pessoas juntas ajuda a reconhecer o grupo." : pessoa ? "Rosto de perto, com luz boa. Peça licença à pessoa." : "Um objeto só, bem de perto, com luz boa e fundo liso. Use as coisas reais da casa."}
             </p>
           </div>
           <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={aoEscolher} />
@@ -527,9 +596,18 @@ const EditorItem: React.FC<{
         </div>
 
         <label className={styles.campo}>
-          <span>{pessoa ? "Nome ou apelido" : "Nome no botão"}</span>
-          <input type="text" value={item.rotulo} onChange={(e) => setItem((i) => ({ ...i, rotulo: e.target.value }))} placeholder={pessoa ? "Ex.: Pedro" : "Ex.: Leite com chocolate"} autoFocus={edicao.novo} />
+          <span>{grupo ? "Nome do grupo" : pessoa ? "Nome ou apelido" : "Nome no botão"}</span>
+          <input type="text" value={item.rotulo} onChange={(e) => setItem((i) => ({ ...i, rotulo: e.target.value }))} placeholder={grupo ? "Ex.: Noras" : pessoa ? "Ex.: Pedro" : "Ex.: Leite com chocolate"} autoFocus={edicao.novo} />
         </label>
+        {pessoa && grupos.length > 0 && (
+          <label className={styles.campo}>
+            <span>Grupo</span>
+            <select value={item.grupo || ""} onChange={(e) => setItem((i) => ({ ...i, grupo: e.target.value || undefined }))}>
+              <option value="">Sem grupo (aparece direto em Pessoas)</option>
+              {grupos.map((g) => <option key={g.id} value={g.id}>{g.rotulo}</option>)}
+            </select>
+          </label>
+        )}
         <label className={styles.campo}>
           <span>Frase falada em voz alta</span>
           <input type="text" value={item.fala} onChange={(e) => setItem((i) => ({ ...i, fala: e.target.value }))} placeholder={item.rotulo ? falaSugerida(item.rotulo) : "Deixe em branco para usar a sugestão"} />
@@ -548,7 +626,7 @@ const EditorItem: React.FC<{
         <div className={styles.rodapeModal}>
           {!edicao.novo && (
             <button type="button" className={styles.perigo} onClick={() => (confirmarExcluir ? onExcluir(edicao.telaId, item.id) : setConfirmarExcluir(true))}>
-              {confirmarExcluir ? "Toque de novo para excluir" : "Excluir"}
+              {confirmarExcluir ? (grupo ? "Toque de novo (as pessoas ficam em Pessoas)" : "Toque de novo para excluir") : grupo ? "Excluir grupo" : "Excluir"}
             </button>
           )}
           <span className={styles.espaco} />

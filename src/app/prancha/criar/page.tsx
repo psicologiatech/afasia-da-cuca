@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "./criar.module.css";
+import { linkDaPrancha } from "@/components/Prancha/sincronizacao";
 
 // Área da equipe: cria a prancha de uma família na nuvem e mostra o link do tablet.
 export default function CriarPranchaPage() {
@@ -32,7 +33,7 @@ export default function CriarPranchaPage() {
       const j = await r.json();
       if (!r.ok || !j.ok) throw new Error(j.erro || "Não foi possível criar.");
       try { localStorage.setItem("conversa-codigo-acesso", codigo); } catch { /* */ }
-      setLink(`${location.origin}/prancha?t=${j.token}`);
+      setLink(linkDaPrancha(j.token));
       setPin(""); setPin2("");
     } catch (err) {
       setMsg(err instanceof Error ? err.message : "Erro ao criar.");
