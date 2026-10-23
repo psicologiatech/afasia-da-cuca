@@ -14,8 +14,7 @@ A ideia central: em vez de falar uma lista de opções e esperar um “sim” ou
 |---|---|---|
 | **`/prancha`** | A pessoa com afasia (tablet ao lado da cama) | Prancha por fotos: 8 botões numa tela só, “Não é isso” fixo, dor em dois passos, chamar alguém com som, teclado para treinar a escrita e **modo família** para tirar fotos na hora. Detalhes em [`docs/proposta-prancha.md`](docs/proposta-prancha.md). |
 | `/prancha/criar` | Equipe | Cria a prancha de uma família na nuvem e gera o link do tablet e o PIN do modo família. |
-| `/` | — | Primeira versão da tela inicial (categorias com subcategorias, Sim/Não, dor de 0 a 10, Teclado Grande). |
-| `/gerenciar` | Equipe | Editar categorias e itens da tela inicial. |
+| `/` e `/gerenciar` | — | Abrem a `/prancha`. A primeira tela inicial (`HomeApp`) e a edição antiga (`GerenciarAntigo`) continuam no código, mas não são mais publicadas: a edição é feita na própria prancha, pelo modo família. |
 | `/entrevista?c=CÓDIGO` | — | Entrevista colaborativa com a família (**fora de uso**: a entrevista já foi feita). |
 | `/convite` | — | Gerava os links da entrevista (**fora de uso**). |
 | `/pesquisa` | Equipe | Pesquisa de base: afasia, disartria, apraxia, soluções existentes e lições de design. |

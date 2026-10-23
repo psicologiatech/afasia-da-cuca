@@ -1,6 +1,8 @@
-import React from "react";
-import { HomeApp } from "@/components/HomeApp/HomeApp";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
-  return <HomeApp />;
+// A tela inicial agora é a prancha por fotos.
+// A primeira versão (componente HomeApp) continua no código, mas não é mais publicada.
+export default function HomePage({ searchParams }: { searchParams: { t?: string } }) {
+  const t = typeof searchParams.t === "string" ? searchParams.t : "";
+  redirect(t ? `/prancha?t=${encodeURIComponent(t)}` : "/prancha");
 }
