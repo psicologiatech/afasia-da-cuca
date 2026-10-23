@@ -196,3 +196,36 @@
   border-color: var(--warm);
   font-size: 1.3rem;
 }
+
+/* Tablet deitado: o teclado ocupa a tela inteira e as teclas crescem para preencher o espaço */
+@media (orientation: landscape) and (min-width: 700px) {
+  .overlay { justify-content: stretch; }
+  .modal {
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    border-top: 0;
+    padding: 12px 14px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 10px 12px;
+  }
+  .topBar { grid-column: 1 / -1; }
+  .title { font-size: 1.3rem; }
+  .display { min-height: 0; font-size: clamp(1.8rem, 4.5vh, 2.6rem); padding: 10px 18px; }
+  .actionsBar { align-self: stretch; }
+  .btnSpeak { font-size: 1.5rem; padding: 10px 24px; }
+  .keyboardGrid {
+    grid-column: 1 / -1;
+    min-height: 0;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .keyBtn { font-size: clamp(2rem, 7vh, 3.4rem); padding: 0; min-height: 0; }
+  .keySpace { grid-column: span 4; font-size: clamp(1.2rem, 3vh, 1.8rem); }
+  .keySim, .keyNao { grid-column: span 3; font-size: clamp(1.3rem, 3.4vh, 2rem); }
+}

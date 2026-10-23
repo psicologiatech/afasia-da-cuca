@@ -36,6 +36,9 @@ As decisões vêm da entrevista com a família (resumo sem dados identificáveis
 
 ### Modo família
 
+- O topo troca a barra de comunicação por um cabeçalho **“Organizar a prancha”**, com Início/Voltar, situação da nuvem, Salvar na nuvem / Link do tablet, Configurações e **Concluir**.
+- **Arrastar e soltar** muda a ordem dos cards (dedo ou mouse). A ordem só muda quando a família mexe.
+
 - Abre segurando a ⚙ por 1,5 s, para a pessoa não abrir sem querer.
 - Tocar num item edita a foto, o nome, a frase e o “esconder da tela”.
 - **Adicionar** abre a câmera (`<input type="file" capture>`): a família tira a foto na hora, e a imagem é cortada em quadrado e reduzida para 640 px.
