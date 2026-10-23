@@ -46,11 +46,30 @@ As decisões vêm da entrevista com a família (resumo sem dados identificáveis
 
 ## Onde ficam os dados
 
-**Tudo fica no próprio aparelho, em IndexedDB** (`conversa-apoiada-prancha`). Fotos e nomes da família **não vão para o servidor nem para o repositório**, que é público.
+A prancha funciona de dois jeitos:
+
+- **Sem link (só no aparelho):** tudo em IndexedDB, como na primeira versão.
+- **Com o link da família (`/prancha?t=TOKEN`):** o conteúdo fica no **Neon** (tabela `pranchas`, campo `dados`) e as fotos no **Vercel Blob privado**, sob `pranchas/<id>/`. O aparelho mantém uma cópia local para funcionar sem internet.
+
+| Ação | Precisa de |
+|---|---|
+| Ver a prancha e as fotos | O link (token) |
+| Trocar fotos, frases e configurações | O link **e o PIN** do modo família |
+| Criar uma prancha nova (`/prancha/criar`) | O `CODIGO_ACESSO` da equipe |
+
+**Como sincroniza:**
+- Ao abrir, o aparelho mostra a cópia local na hora e depois confere o servidor.
+- A cada 90 s e quando a internet volta, ele busca novidades. Assim, uma foto tirada no celular de alguém da família aparece no tablet.
+- As mudanças do modo família sobem na hora. Sem internet, ficam como “Aguardando internet” e sobem quando a conexão voltar.
+- Em conflito, vale a última gravação.
+- Fotos trocadas ou excluídas são apagadas do Blob.
+
+**Rotas:**
+- `POST /api/prancha`: cria a prancha (código da equipe).
+- `GET /api/prancha/[token]` e `PUT /api/prancha/[token]`: lê, e salva com PIN.
+- `/api/prancha/[token]/foto`: `GET ?p=` entrega a foto privada, `POST` envia a foto (JPEG, com PIN) e `DELETE ?p=` apaga (com PIN).
 
 O conteúdo inicial (`src/components/Prancha/conteudoInicial.ts`) é genérico de propósito. Antes do uso, conferir comidas e bebidas com a fonoaudióloga, por causa da segurança para engolir.
-
-Uma sincronização com o banco (Prisma) pode vir depois, por exemplo para a família mandar fotos do próprio celular. Isso exige armazenamento privado das imagens e autenticação.
 
 ---
 

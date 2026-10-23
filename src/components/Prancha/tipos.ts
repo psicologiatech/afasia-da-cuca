@@ -8,7 +8,8 @@ export interface ItemPrancha {
   rotulo: string; // texto curto no botão (pode ter {a} para gênero)
   fala: string; // frase dita em voz alta (pode ter {a})
   emoji?: string; // usado enquanto não houver foto
-  foto?: string; // data URL (JPEG reduzido) tirada pela família
+  foto?: string; // data URL (JPEG reduzido): cópia da foto guardada no aparelho
+  fotoBlob?: string; // caminho da foto no Vercel Blob privado (quando a prancha está ligada à nuvem)
   oculto?: boolean; // escondido da tela, mas não apagado
   personalizado?: boolean; // criado pela família (pode ser excluído)
 }
