@@ -1,0 +1,20 @@
+.pagina { padding-block: 40px 60px; max-width: 760px; }
+.form { display: grid; gap: 14px; margin: 20px 0; }
+.linha { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.linha > .campo { flex: 1; min-width: 220px; }
+.campo { display: block; }
+.campo span { display: block; font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+.campo input {
+  width: 100%; font: inherit; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.botao, .botaoSec {
+  font: inherit; font-weight: 700; padding: 12px 20px; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+  text-decoration: none; display: inline-block; justify-self: start;
+}
+.botaoSec { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.msg { font-weight: 700; }
+.resultado { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: grid; gap: 12px; }
+.link { word-break: break-all; background: var(--surface-2); padding: 10px 12px; border-radius: 10px; font-size: 0.95rem; }
+.dica { color: var(--muted); font-size: 0.9rem; margin: 0; }

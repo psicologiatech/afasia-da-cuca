@@ -292,3 +292,6 @@
   position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 50;
   background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 12px;
 }
+
+.nuvem { flex: 0 0 auto !important; min-width: 0 !important; font-size: 0.95rem; padding: 4px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); }
+.nuvem[data-status="erro"] { color: #c0392b; border-color: #c0392b; }

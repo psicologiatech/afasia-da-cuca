@@ -1,6 +1,7 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED") // conexão direta do Neon, usada nas migrações
 }
 
 generator client {
@@ -68,4 +69,23 @@ model Resposta {
   atualizadoEm     DateTime @updatedAt
 
   @@map("respostas")
+}
+
+// ==========================================
+// PRANCHA POR FOTOS (/prancha)
+// ==========================================
+
+// Uma prancha por família. O conteúdo inteiro (telas, itens, configurações) fica em "dados";
+// as fotos ficam no Vercel Blob PRIVADO e "dados" guarda só o caminho delas (fotoBlob).
+model Prancha {
+  id           String   @id @default(uuid())
+  nome         String
+  token        String   @unique // vai no link do tablet: só leitura
+  pinHash      String   // PIN do modo família (scrypt), necessário para alterar
+  dados        Json
+  versao       Int      @default(1)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("pranchas")
 }

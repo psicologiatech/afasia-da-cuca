@@ -6,6 +6,9 @@ import { DadosPrancha, ItemPrancha, TelaPrancha } from "./tipos";
 import { CONTEUDO_INICIAL, INTENSIDADE_DOR, PARTES_DOR, comGenero } from "./conteudoInicial";
 import { TecladoGrande } from "../TecladoGrande/TecladoGrande";
 import { carregarDados, falar, iniciarChamado, novoId, pararChamado, prepararFoto, salvarDados } from "./apoio";
+import { EstadoSync, baixar, enviar, guardarPin, lerPin, lerSync, mesclarFotos, obterToken, salvarSync } from "./sincronizacao";
+
+type StatusNuvem = "local" | "salvo" | "enviando" | "pendente" | "erro";
 
 // Prancha por fotos: tudo numa tela só, uma camada de profundidade,
 // "Não é isso" sempre visível e um modo família para tirar fotos na hora.
@@ -32,6 +35,12 @@ export const Prancha: React.FC = () => {
   const [noite, setNoite] = useState(false);
   const [aviso, setAviso] = useState("");
   const [teclado, setTeclado] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [nuvem, setNuvem] = useState<StatusNuvem>("local");
+  const [pedirPin, setPedirPin] = useState(false);
+  const dadosRef = useRef(dados);
+  const syncRef = useRef<EstadoSync>({ pendente: false, apagar: [] });
+  const enviandoRef = useRef(false);
 
   const ultimoToque = useRef(0);
   const timerSegurar = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -40,15 +49,91 @@ export const Prancha: React.FC = () => {
   const g = dados.config.genero;
   const t = useCallback((s: string) => comGenero(s, g), [g]);
 
-  // carregar do aparelho
-  useEffect(() => {
-    carregarDados().then((d) => { setDados(d); setPronto(true); });
-  }, []);
-
-  const atualizar = useCallback((novo: DadosPrancha) => {
+  const guardarLocal = useCallback((novo: DadosPrancha) => {
+    dadosRef.current = novo;
     setDados(novo);
     salvarDados(novo).then((ok) => { if (!ok) setAviso("Não foi possível guardar neste aparelho."); });
   }, []);
+
+  // envia ao servidor o que está pendente (precisa do PIN, que só existe no modo família)
+  const sincronizar = useCallback(async () => {
+    const tk = token, pin = lerPin();
+    if (!tk || !syncRef.current.pendente || enviandoRef.current) return;
+    if (!pin) { setNuvem("pendente"); return; }
+    if (!navigator.onLine) { setNuvem("pendente"); return; }
+    enviandoRef.current = true; setNuvem("enviando");
+    try {
+      const enviado = dadosRef.current;
+      const r = await enviar(tk, pin, enviado, syncRef.current);
+      // se nada mudou durante o envio, guarda os caminhos das fotos enviadas
+      const mudouNoMeio = dadosRef.current !== enviado;
+      if (!mudouNoMeio) guardarLocal(r.dados);
+      syncRef.current = { ...r.sync, pendente: mudouNoMeio };
+      salvarSync(syncRef.current);
+      setNuvem(syncRef.current.pendente ? "pendente" : "salvo");
+    } catch (e) {
+      setNuvem("erro");
+      setAviso(e instanceof Error ? e.message : "Não foi possível salvar na nuvem.");
+    } finally {
+      enviandoRef.current = false;
+    }
+  }, [token, guardarLocal]);
+
+  const atualizar = useCallback((novo: DadosPrancha, apagarFotos: string[] = []) => {
+    guardarLocal(novo);
+    if (!token) return;
+    syncRef.current = { ...syncRef.current, pendente: true, apagar: [...syncRef.current.apagar, ...apagarFotos] };
+    salvarSync(syncRef.current);
+    void sincronizar();
+  }, [token, guardarLocal, sincronizar]);
+
+  // traz do servidor, se lá estiver mais novo
+  const puxar = useCallback(async (tk: string) => {
+    try {
+      const srv = await baixar(tk);
+      const s = syncRef.current;
+      if (s.pendente) { void sincronizar(); return; }
+      if (s.versaoServidor === undefined && srv.versao === 1) {
+        // primeira ligação deste aparelho a uma prancha nova: o conteúdo daqui sobe
+        syncRef.current = { ...s, pendente: true }; salvarSync(syncRef.current); setNuvem("pendente");
+        return;
+      }
+      if (srv.versao !== s.versaoServidor) {
+        const mesclado = await mesclarFotos(srv.dados, dadosRef.current, tk);
+        guardarLocal(mesclado);
+        syncRef.current = { ...s, versaoServidor: srv.versao }; salvarSync(syncRef.current);
+      }
+      setNuvem("salvo");
+    } catch {
+      setNuvem(syncRef.current.pendente ? "pendente" : "erro");
+    }
+  }, [guardarLocal, sincronizar]);
+
+  // carregar do aparelho e, se houver link da família, da nuvem
+  useEffect(() => {
+    const tk = obterToken();
+    setToken(tk);
+    syncRef.current = lerSync();
+    carregarDados().then((d) => {
+      dadosRef.current = d; setDados(d); setPronto(true);
+      if (tk) void puxar(tk);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // de tempos em tempos, e quando a internet volta, sincroniza
+  useEffect(() => {
+    if (!token) return;
+    const tk = token;
+    const ciclo = () => {
+      if (document.visibilityState !== "visible") return;
+      if (syncRef.current.pendente) void sincronizar();
+      else if (!familia) void puxar(tk);
+    };
+    const id = setInterval(ciclo, 90_000);
+    window.addEventListener("online", ciclo);
+    return () => { clearInterval(id); window.removeEventListener("online", ciclo); };
+  }, [token, familia, puxar, sincronizar]);
 
   // tema noturno automático (20h às 7h)
   useEffect(() => {
@@ -132,7 +217,10 @@ export const Prancha: React.FC = () => {
   const comecarSegurar = () => {
     if (familia) { setFamilia(false); setConfigAberta(false); return; }
     setSegurando(true);
-    timerSegurar.current = setTimeout(() => { setSegurando(false); setFamilia(true); }, TEMPO_SEGURAR);
+    timerSegurar.current = setTimeout(() => {
+      setSegurando(false);
+      if (token && !lerPin()) setPedirPin(true); else { setFamilia(true); void sincronizar(); }
+    }, TEMPO_SEGURAR);
   };
   const soltarSegurar = () => {
     if (timerSegurar.current) clearTimeout(timerSegurar.current);
@@ -158,11 +246,14 @@ export const Prancha: React.FC = () => {
       const existe = tl.itens.some((i) => i.id === item.id);
       return { ...tl, itens: existe ? tl.itens.map((i) => (i.id === item.id ? item : i)) : [...tl.itens, item] };
     });
-    atualizar({ ...dados, telas });
+    const antigo = dados.telas.find((tl) => tl.id === edicao.telaId)?.itens.find((i) => i.id === item.id);
+    const apagar = antigo?.fotoBlob && antigo.fotoBlob !== item.fotoBlob ? [antigo.fotoBlob] : [];
+    atualizar({ ...dados, telas }, apagar);
     setEdicao(null);
   };
   const excluirItem = (telaIdEd: string, id: string) => {
-    atualizar({ ...dados, telas: dados.telas.map((tl) => (tl.id === telaIdEd ? { ...tl, itens: tl.itens.filter((i) => i.id !== id) } : tl)) });
+    const antigo = dados.telas.find((tl) => tl.id === telaIdEd)?.itens.find((i) => i.id === id);
+    atualizar({ ...dados, telas: dados.telas.map((tl) => (tl.id === telaIdEd ? { ...tl, itens: tl.itens.filter((i) => i.id !== id) } : tl)) }, antigo?.fotoBlob ? [antigo.fotoBlob] : []);
     setEdicao(null);
   };
   const novoItem = (tl: TelaPrancha) => {
@@ -280,6 +371,9 @@ export const Prancha: React.FC = () => {
       {familia && (
         <div className={styles.faixaFamilia}>
           <span><strong>Modo família.</strong> Toque num item para trocar a foto ou a frase. “Adicionar” abre a câmera.</span>
+          <span className={styles.nuvem} data-status={nuvem}>
+            {{ local: "📱 Só neste aparelho", salvo: "☁️ Salvo na nuvem", enviando: "☁️ Enviando…", pendente: "⏳ Aguardando internet", erro: "⚠️ Não sincronizou" }[nuvem]}
+          </span>
           <button type="button" onClick={() => setConfigAberta(true)}>Configurações</button>
           <button type="button" onClick={() => { setFamilia(false); setConfigAberta(false); }}>Sair</button>
         </div>
@@ -315,6 +409,14 @@ export const Prancha: React.FC = () => {
           <p>{t("Preciso de ajuda!")}</p>
           <button type="button" onClick={pararDeChamar}>Já vim — desligar</button>
         </div>
+      )}
+
+      {pedirPin && token && (
+        <PedirPin
+          token={token}
+          onOk={(pin) => { guardarPin(pin); setPedirPin(false); setFamilia(true); void sincronizar(); }}
+          onFechar={() => setPedirPin(false)}
+        />
       )}
 
       {config && <Configuracoes dados={dados} onMudar={atualizar} onFechar={() => setConfigAberta(false)} />}
@@ -363,7 +465,7 @@ const EditorItem: React.FC<{
     e.target.value = "";
     if (!f) return;
     setCarregando(true); setErro("");
-    try { const foto = await prepararFoto(f); setItem((i) => ({ ...i, foto })); }
+    try { const foto = await prepararFoto(f); setItem((i) => ({ ...i, foto, fotoBlob: undefined })); }
     catch (err) { setErro(err instanceof Error ? err.message : "Erro na foto."); }
     setCarregando(false);
   };
@@ -389,7 +491,7 @@ const EditorItem: React.FC<{
           <div className={styles.fotoAcoes}>
             <button type="button" className={styles.primario} onClick={() => camera.current?.click()} disabled={carregando}>📷 Tirar foto</button>
             <button type="button" onClick={() => galeria.current?.click()} disabled={carregando}>🖼️ Escolher da galeria</button>
-            {item.foto && <button type="button" onClick={() => setItem((i) => ({ ...i, foto: undefined }))}>Remover foto</button>}
+            {item.foto && <button type="button" onClick={() => setItem((i) => ({ ...i, foto: undefined, fotoBlob: undefined }))}>Remover foto</button>}
             <p className={styles.dica}>
               {pessoa ? "Rosto de perto, com luz boa. Peça licença à pessoa." : "Um objeto só, bem de perto, com luz boa e fundo liso. Use as coisas reais da casa."}
             </p>
@@ -517,6 +619,43 @@ const Configuracoes: React.FC<{ dados: DadosPrancha; onMudar: (d: DadosPrancha) 
           <button type="button" className={styles.primario} onClick={onFechar}>Pronto</button>
         </div>
       </div>
+    </div>
+  );
+};
+
+// ---------- PIN do modo família (prancha ligada à nuvem) ----------
+
+const PedirPin: React.FC<{ token: string; onOk: (pin: string) => void; onFechar: () => void }> = ({ token, onOk, onFechar }) => {
+  const [pin, setPin] = useState("");
+  const [msg, setMsg] = useState("");
+  const [conferindo, setConferindo] = useState(false);
+  const conferir = async () => {
+    if (!/^\d{6,10}$/.test(pin)) { setMsg("O PIN tem de 6 a 10 números."); return; }
+    setConferindo(true); setMsg("");
+    try {
+      const r = await baixar(token, pin);
+      if (r.podeEditar) onOk(pin); else setMsg("PIN incorreto.");
+    } catch {
+      setMsg("Sem internet. Para editar, conecte o aparelho e tente de novo.");
+    }
+    setConferindo(false);
+  };
+  return (
+    <div className={styles.modalFundo} onClick={onFechar}>
+      <form className={styles.modal} onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); void conferir(); }} role="dialog" aria-label="PIN do modo família">
+        <h2>Modo família</h2>
+        <p className={styles.dica}>Digite o PIN da família para trocar fotos e frases.</p>
+        <label className={styles.campo}>
+          <span>PIN</span>
+          <input id="pin-familia" type="password" inputMode="numeric" autoComplete="off" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} autoFocus />
+        </label>
+        {msg && <p className={styles.erro}>{msg}</p>}
+        <div className={styles.rodapeModal}>
+          <span className={styles.espaco} />
+          <button type="button" onClick={onFechar}>Cancelar</button>
+          <button type="submit" className={styles.primario} disabled={conferindo}>{conferindo ? "Conferindo…" : "Entrar"}</button>
+        </div>
+      </form>
     </div>
   );
 };
