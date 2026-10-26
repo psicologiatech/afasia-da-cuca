@@ -155,6 +155,14 @@ export const Prancha: React.FC = () => {
     return () => clearInterval(id);
   }, [dados.config.tema]);
 
+  // o tema da prancha manda, e não o modo escuro do aparelho:
+  // sem isto, "Sempre clara" continuava escura em celular ou navegador no modo escuro
+  useEffect(() => {
+    const raiz = document.documentElement;
+    raiz.setAttribute("data-theme", noite ? "dark" : "light");
+    return () => raiz.removeAttribute("data-theme");
+  }, [noite]);
+
   // app instalável: guarda o app no aparelho e oferece "Instalar" quando o navegador permite
   useEffect(() => {
     if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
