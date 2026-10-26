@@ -29,7 +29,10 @@
   --accent-ink: #0e1d1a;
   --warm: #f0956a;
 }
-.noite .fotoInteira { filter: brightness(0.85); }
+.noite .fotoInteira, .noite img.emoji { filter: brightness(0.88); }
+/* cores do bonequinho da tela de Dor */
+.app { --corpo: #f1e8db; --corpoContorno: #6f6457; --corpoDor: #d23c2a; --corpoCabelo: #6b5443; }
+.noite { --corpo: #4a443c; --corpoContorno: #b4ab9d; --corpoDor: #ff6a50; --corpoCabelo: #a08670; }
 
 /* ---------- barra fixa ---------- */
 
@@ -48,12 +51,19 @@
   border: 3px solid transparent;
   cursor: pointer;
   color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
 }
+.emojiBarra { height: 1.35em; width: auto; flex: none; font-size: 1em; line-height: 1; }
 .espaco { flex: 1; }
 .inicio { background: var(--surface) !important; color: var(--ink) !important; border-color: var(--line) !important; }
-.naoEIsso { background: #b5552b; }
+/* "Não é isso" em âmbar, como placa de atenção: não se confunde com "Não" (vermelho) */
+.naoEIsso { background: #f2b33d; color: #2a1c05 !important; }
 .sim { background: #1f6f62; }
-.nao { background: #7a4a3a; }
+.nao { background: #b03a2e; }
+.noite .naoEIsso { background: #d39a2c; }
 .engrenagem {
   width: clamp(56px, 8vw, 84px);
   background: var(--surface) !important;
@@ -99,6 +109,9 @@
 .titulo {
   flex: 0 0 auto;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
   font-size: clamp(1.4rem, 3.4vw, 2.4rem);
   line-height: 1.1;
 }
@@ -161,7 +174,11 @@
   object-fit: cover; filter: blur(18px) saturate(1.1); opacity: 0.55;
 }
 .fotoInteira { position: relative; object-fit: contain; padding: 4px; }
-.emoji { font-size: clamp(2.8rem, 9vmin, 6.5rem); line-height: 1; }
+/* emoji grande, ocupando quase toda a área da imagem (cqh = altura do card) */
+.emoji { font-size: clamp(2.8rem, 38cqh, 11rem); line-height: 1; }
+img.emoji { height: 54cqh; width: auto; max-width: 88%; object-fit: contain; font-size: inherit; }
+.figura { height: 57cqh; width: auto; max-width: 92%; }
+.tituloEmoji { height: 1.25em; width: auto; flex: none; }
 
 .rotulo {
   flex: 0 0 40%;
@@ -223,12 +240,14 @@
   background: var(--surface);
   color: var(--ink);
   font: inherit;
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.35);
+  /* a segunda sombra escurece o resto da tela: a frase fica sozinha */
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.35), 0 0 0 100vmax rgba(20, 16, 12, 0.5);
   cursor: pointer;
   animation: surgir 0.15s ease-out;
 }
 .destaque img { max-height: 58%; max-width: 80%; border-radius: 18px; object-fit: contain; }
 .destaqueEmoji { font-size: clamp(5rem, 22vmin, 12rem); line-height: 1; }
+img.destaqueEmoji { width: clamp(8rem, 34vmin, 17rem); height: auto; }
 .destaqueTexto { font-size: clamp(1.8rem, 5vw, 3.4rem); font-weight: 700; text-align: center; line-height: 1.15; }
 .acoesPessoa { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .acoesPessoa button {
@@ -249,6 +268,7 @@
 }
 .chamando p { margin: 0; font-size: clamp(2.2rem, 7vw, 4.5rem); font-weight: 700; }
 .sino { font-size: clamp(5rem, 20vmin, 10rem); }
+img.sino { width: clamp(6rem, 24vmin, 12rem); height: auto; }
 .chamando button {
   font: inherit; font-weight: 700; font-size: clamp(1.2rem, 3vw, 2rem);
   padding: 18px 32px; border-radius: 18px; border: 0;

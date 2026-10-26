@@ -1,7 +1,10 @@
 // Service worker da prancha: guarda o app no aparelho para abrir mesmo sem internet.
 // Nunca guarda as rotas /api (dados e fotos da família vêm sempre do servidor ou do IndexedDB).
-const VERSAO = "prancha-v1";
-const ESSENCIAL = ["/prancha", "/manifest.webmanifest", "/icons/icone-192.png", "/icons/icone-512.png"];
+const VERSAO = "prancha-v2";
+// lista das imagens de emoji (gerada por scripts/gerar-emojis.py): guardadas já na instalação,
+// para todas as figuras aparecerem mesmo sem internet
+importScripts("/emoji/lista.js");
+const ESSENCIAL = ["/prancha", "/manifest.webmanifest", "/icons/icone-192.png", "/icons/icone-512.png", ...(self.EMOJIS || [])];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(ESSENCIAL)).then(() => self.skipWaiting()));
@@ -22,7 +25,7 @@ self.addEventListener("fetch", (e) => {
   if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
 
   // arquivos com nome versionado (código, fontes, ícones): do cache primeiro
-  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")) {
+  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") || url.pathname.startsWith("/emoji/")) {
     e.respondWith(
       caches.match(req).then((achado) => achado || fetch(req).then((resp) => {
         if (resp.ok) { const copia = resp.clone(); caches.open(VERSAO).then((c) => c.put(req, copia)); }
