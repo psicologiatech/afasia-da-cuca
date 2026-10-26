@@ -5,6 +5,7 @@ import styles from "./Prancha.module.css";
 import { DadosPrancha, ItemPrancha, TelaPrancha } from "./tipos";
 import { CONTEUDO_INICIAL, INTENSIDADE_DOR, PARTES_DOR, comGenero } from "./conteudoInicial";
 import { TecladoGrande } from "../TecladoGrande/TecladoGrande";
+import { Icone, temIcone } from "../Icone/Icone";
 import { carregarDados, falar, iniciarChamado, novoId, pararChamado, prepararFoto, salvarDados } from "./apoio";
 import { EstadoSync, baixar, criarNaNuvem, enviar, guardarPin, guardarToken, lerPin, lerSync, linkDaPrancha, mesclarFotos, obterToken, salvarSync } from "./sincronizacao";
 
@@ -233,16 +234,18 @@ export const Prancha: React.FC = () => {
     }
     if (familia) { setEdicao({ telaId: tl.id, item: { ...it }, novo: false }); return; }
     if (!podeTocar()) return;
-    if (tl.tipo === "pessoas") { dizer(t(it.fala) || it.rotulo, it.emoji, it.foto, true); setPessoa(it); return; }
-    dizer(t(it.fala), it.emoji, it.foto);
+    if (tl.tipo === "pessoas") { dizer(t(it.fala) || it.rotulo, simbolo(it.id, it.emoji), it.foto, true); setPessoa(it); return; }
+    dizer(t(it.fala), simbolo(it.id, it.emoji), it.foto);
   };
+
+  const simbolo = (chave: string, emoji?: string) => (temIcone(chave) ? "@" + chave : emoji);
 
   const pararDeChamar = () => { pararChamado(); setChamando(false); };
 
   // ----- barra fixa -----
-  const naoEIsso = () => { if (podeTocar()) dizer("Não é isso.", "✋"); };
-  const sim = () => { if (podeTocar()) dizer("Sim.", "👍"); };
-  const nao = () => { if (podeTocar()) dizer("Não.", "👎"); };
+  const naoEIsso = () => { if (podeTocar()) dizer("Não é isso.", "@ui:naoEIsso"); };
+  const sim = () => { if (podeTocar()) dizer("Sim.", "@ui:sim"); };
+  const nao = () => { if (podeTocar()) dizer("Não.", "@ui:nao"); };
 
   // ----- modo família: segurar a engrenagem -----
   const comecarSegurar = () => {
@@ -360,18 +363,19 @@ export const Prancha: React.FC = () => {
 
   // ---------- telas ----------
 
-  const Botao = ({ rotulo, emoji, foto, cor, onClick, oculto, editavel, classe }: {
-    rotulo: string; emoji?: string; foto?: string; cor?: string; onClick: () => void; oculto?: boolean; editavel?: boolean; classe?: string;
+  const Botao = ({ rotulo, emoji, icone, foto, cor, onClick, oculto, editavel, classe }: {
+    rotulo: string; emoji?: string; icone?: string; foto?: string; cor?: string; onClick: () => void; oculto?: boolean; editavel?: boolean; classe?: string;
   }) => (
-    <button type="button" className={`${styles.botao} ${oculto ? styles.oculto : ""} ${classe || ""}`} style={cor ? { borderColor: cor } : undefined} onClick={onClick}>
-      <span className={styles.imagem} style={cor && !foto ? { background: cor + "22" } : undefined}>
+    <button type="button" className={`${styles.botao} ${oculto ? styles.oculto : ""} ${classe || ""}`} style={cor ? ({ "--cor": cor } as React.CSSProperties) : undefined} onClick={onClick}>
+      <span className={`${styles.imagem} ${foto ? styles.comFoto : ""}`}>
         {foto ? (
           <>
             {/* fundo desfocado da própria foto preenche o espaço; a foto aparece inteira por cima */}
             <img src={foto} alt="" className={styles.fundoFoto} aria-hidden />
             <img src={foto} alt="" className={styles.fotoInteira} />
           </>
-        ) : <span className={styles.emoji} aria-hidden>{emoji}</span>}
+        ) : temIcone(icone) ? <span className={styles.selo}><Icone chave={icone} className={styles.icone} /></span>
+          : <span className={styles.emoji} aria-hidden>{emoji}</span>}
       </span>
       <span className={styles.rotulo}>{rotulo}</span>
       {editavel && <span className={styles.lapis} aria-hidden>✎</span>}
@@ -403,7 +407,7 @@ export const Prancha: React.FC = () => {
 
   const Mais = ({ total }: { total: number }) => (
     <button type="button" className={`${styles.botao} ${styles.mais}`} onClick={() => setPagina((p) => (p + 1) % total)}>
-      <span className={styles.emoji} aria-hidden>➜</span>
+      <span className={styles.selo}><Icone chave="ui:mais" className={styles.icone} /></span>
       <span className={styles.rotulo}>Mais</span>
     </button>
   );
@@ -414,7 +418,7 @@ export const Prancha: React.FC = () => {
     conteudo = (
       <div className={`${styles.grade} ${dados.config.modoSimples ? styles.grade4 : ""}`}>
         {telasVisiveis.map((tl) => (
-          <Botao key={tl.id} rotulo={tl.rotulo} emoji={tl.emoji} cor={tl.cor} onClick={() => abrirTela(tl)} classe={tl.tipo === "chamar" ? styles.chamar : ""} />
+          <Botao key={tl.id} rotulo={tl.rotulo} emoji={tl.emoji} icone={`tela:${tl.id}`} cor={tl.cor} onClick={() => abrirTela(tl)} classe={tl.tipo === "chamar" ? styles.chamar : ""} />
         ))}
       </div>
     );
@@ -458,7 +462,7 @@ export const Prancha: React.FC = () => {
           {pg.itens.map((it) => (
             <Celula key={it.id} telaIdC={tela.id} it={it}>
               <Botao
-                rotulo={t(it.rotulo)} emoji={it.emoji} foto={it.foto} cor={tela.cor} oculto={it.oculto}
+                rotulo={t(it.rotulo)} emoji={it.emoji} icone={it.id} foto={it.foto} cor={tela.cor} oculto={it.oculto}
                 editavel={familia && !it.ehGrupo} classe={it.ehGrupo ? styles.grupo : ""}
                 onClick={() => tocarItem(tela, it)}
               />
@@ -512,16 +516,16 @@ export const Prancha: React.FC = () => {
         <div className={styles.barra}>
         {tela ? (
           <button type="button" className={styles.inicio} onClick={() => (parteDor ? setParteDor(null) : grupoId ? (setGrupoId(null), setPagina(0)) : irPara(null))}>
-            <span aria-hidden>⌂</span> {parteDor || grupoId ? "Voltar" : "Início"}
+            <Icone chave="ui:inicio" className={styles.iconeBarra} /> {parteDor || grupoId ? "Voltar" : "Início"}
           </button>
         ) : (
           <button type="button" className={styles.inicio} onClick={() => setTeclado(true)} aria-label="Abrir o teclado para escrever">
-            <span aria-hidden>⌨</span> Escrever
+            <Icone chave="ui:escrever" className={styles.iconeBarra} /> Escrever
           </button>
         )}
-        <button type="button" className={styles.naoEIsso} onClick={naoEIsso}>✋ Não é isso</button>
-        <button type="button" className={styles.sim} onClick={sim}>👍 Sim</button>
-        <button type="button" className={styles.nao} onClick={nao}>👎 Não</button>
+        <button type="button" className={styles.naoEIsso} onClick={naoEIsso}><Icone chave="ui:naoEIsso" className={styles.iconeBarra} /> Não é isso</button>
+        <button type="button" className={styles.sim} onClick={sim}><Icone chave="ui:sim" className={styles.iconeBarra} /> Sim</button>
+        <button type="button" className={styles.nao} onClick={nao}><Icone chave="ui:nao" className={styles.iconeBarra} /> Não</button>
         <button
           type="button"
           className={`${styles.engrenagem} ${segurando ? styles.segurando : ""}`}
@@ -531,14 +535,14 @@ export const Prancha: React.FC = () => {
           onPointerLeave={soltarSegurar}
           onContextMenu={(e) => e.preventDefault()}
         >
-          {familia ? "✓" : "⚙"}
+          {familia ? "✓" : <Icone chave="ui:config" className={styles.iconeBarra} />}
         </button>
       </div>
       )}
 
       {tela && (
         <h1 className={styles.titulo}>
-          <span aria-hidden>{tela.emoji}</span> {parteDor ? `${parteDor}. Quanto?` : grupoId ? `${tela.rotulo} · ${tela.itens.find((i) => i.id === grupoId)?.rotulo ?? ""}` : tela.rotulo}
+          {temIcone(`tela:${tela.id}`) ? <span className={styles.seloTitulo} style={{ "--cor": tela.cor } as React.CSSProperties}><Icone chave={`tela:${tela.id}`} /></span> : <span aria-hidden>{tela.emoji}</span>} {parteDor ? `${parteDor}. Quanto?` : grupoId ? `${tela.rotulo} · ${tela.itens.find((i) => i.id === grupoId)?.rotulo ?? ""}` : tela.rotulo}
         </h1>
       )}
 
@@ -547,7 +551,9 @@ export const Prancha: React.FC = () => {
       {/* destaque do que foi dito */}
       {destaque && !chamando && (
         <div className={styles.destaque} role="dialog" aria-live="assertive" onClick={() => setDestaque(null)}>
-          {destaque.foto ? <img src={destaque.foto} alt="" /> : destaque.emoji ? <span className={styles.destaqueEmoji}>{destaque.emoji}</span> : null}
+          {destaque.foto ? <img src={destaque.foto} alt="" />
+            : destaque.emoji?.startsWith("@") ? <span className={styles.destaqueSelo}><Icone chave={destaque.emoji.slice(1)} /></span>
+            : destaque.emoji ? <span className={styles.destaqueEmoji}>{destaque.emoji}</span> : null}
           <span className={styles.destaqueTexto}>{destaque.texto}</span>
           {pessoa && (
             <span className={styles.acoesPessoa} onClick={(e) => e.stopPropagation()}>
@@ -564,7 +570,7 @@ export const Prancha: React.FC = () => {
       {/* chamando */}
       {chamando && (
         <div className={styles.chamando} role="alertdialog" aria-label="Chamando alguém">
-          <span className={styles.sino} aria-hidden>🔔</span>
+          <Icone chave="tela:chamar" className={styles.sino} />
           <p>{t("Preciso de ajuda!")}</p>
           <button type="button" onClick={pararDeChamar}>Já vim — desligar</button>
         </div>
