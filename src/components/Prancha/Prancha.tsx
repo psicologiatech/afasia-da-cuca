@@ -5,6 +5,8 @@ import styles from "./Prancha.module.css";
 import { DadosPrancha, ItemPrancha, TelaPrancha } from "./tipos";
 import { CONTEUDO_INICIAL, INTENSIDADE_DOR, PARTES_DOR, comGenero } from "./conteudoInicial";
 import { TecladoGrande } from "../TecladoGrande/TecladoGrande";
+import { Emoji } from "../Emoji/Emoji";
+import { FiguraCorpo, ParteCorpo, ehParteCorpo } from "../FiguraCorpo/FiguraCorpo";
 import { carregarDados, falar, iniciarChamado, novoId, pararChamado, prepararFoto, salvarDados } from "./apoio";
 import { EstadoSync, baixar, criarNaNuvem, enviar, guardarPin, guardarToken, lerPin, lerSync, linkDaPrancha, mesclarFotos, obterToken, salvarSync } from "./sincronizacao";
 
@@ -153,6 +155,14 @@ export const Prancha: React.FC = () => {
     const id = setInterval(calcular, 60_000);
     return () => clearInterval(id);
   }, [dados.config.tema]);
+
+  // o tema da prancha manda, e não o modo escuro do aparelho:
+  // sem isto, "Sempre clara" continuava escura em celular ou navegador no modo escuro
+  useEffect(() => {
+    const raiz = document.documentElement;
+    raiz.setAttribute("data-theme", noite ? "dark" : "light");
+    return () => raiz.removeAttribute("data-theme");
+  }, [noite]);
 
   // app instalável: guarda o app no aparelho e oferece "Instalar" quando o navegador permite
   useEffect(() => {
@@ -360,8 +370,8 @@ export const Prancha: React.FC = () => {
 
   // ---------- telas ----------
 
-  const Botao = ({ rotulo, emoji, foto, cor, onClick, oculto, editavel, classe }: {
-    rotulo: string; emoji?: string; foto?: string; cor?: string; onClick: () => void; oculto?: boolean; editavel?: boolean; classe?: string;
+  const Botao = ({ rotulo, emoji, figura, foto, cor, onClick, oculto, editavel, classe }: {
+    rotulo: string; emoji?: string; figura?: ParteCorpo; foto?: string; cor?: string; onClick: () => void; oculto?: boolean; editavel?: boolean; classe?: string;
   }) => (
     <button type="button" className={`${styles.botao} ${oculto ? styles.oculto : ""} ${classe || ""}`} style={cor ? { borderColor: cor } : undefined} onClick={onClick}>
       <span className={styles.imagem} style={cor && !foto ? { background: cor + "22" } : undefined}>
@@ -371,7 +381,8 @@ export const Prancha: React.FC = () => {
             <img src={foto} alt="" className={styles.fundoFoto} aria-hidden />
             <img src={foto} alt="" className={styles.fotoInteira} />
           </>
-        ) : <span className={styles.emoji} aria-hidden>{emoji}</span>}
+        ) : figura ? <FiguraCorpo parte={figura} className={styles.figura} />
+          : <Emoji emoji={emoji} className={styles.emoji} />}
       </span>
       <span className={styles.rotulo}>{rotulo}</span>
       {editavel && <span className={styles.lapis} aria-hidden>✎</span>}
@@ -428,7 +439,7 @@ export const Prancha: React.FC = () => {
     ) : (
       <div className={styles.grade}>
         {PARTES_DOR.map((p) => (
-          <Botao key={p.id} rotulo={p.rotulo} emoji={p.emoji} cor={tela.cor} onClick={() => {
+          <Botao key={p.id} rotulo={p.rotulo} emoji={p.emoji} figura={ehParteCorpo(p.id) ? p.id : undefined} cor={tela.cor} onClick={() => {
             if (!podeTocar()) return;
             const frase = p.id === "outro" ? "Dói em outro lugar" : `Dói ${p.id === "costas" ? "as costas" : (["cabeca", "garganta", "barriga", "perna"].includes(p.id) ? "a " : "o ") + p.rotulo.toLowerCase()}`;
             setParteDor(frase);
@@ -466,13 +477,13 @@ export const Prancha: React.FC = () => {
           ))}
           {familia && (
             <button type="button" className={`${styles.botao} ${styles.adicionar}`} onClick={() => novoItem(tela)}>
-              <span className={styles.emoji} aria-hidden>📷</span>
+              <Emoji emoji="📷" className={styles.emoji} />
               <span className={styles.rotulo}>{ehPessoas ? "Adicionar pessoa" : "Adicionar"}</span>
             </button>
           )}
           {familia && ehPessoas && !grupoAtual && (
             <button type="button" className={`${styles.botao} ${styles.adicionar}`} onClick={() => novoItem(tela, true)}>
-              <span className={styles.emoji} aria-hidden>👪</span>
+              <Emoji emoji="👪" className={styles.emoji} />
               <span className={styles.rotulo}>Novo grupo</span>
             </button>
           )}
@@ -519,9 +530,9 @@ export const Prancha: React.FC = () => {
             <span aria-hidden>⌨</span> Escrever
           </button>
         )}
-        <button type="button" className={styles.naoEIsso} onClick={naoEIsso}>✋ Não é isso</button>
-        <button type="button" className={styles.sim} onClick={sim}>👍 Sim</button>
-        <button type="button" className={styles.nao} onClick={nao}>👎 Não</button>
+        <button type="button" className={styles.naoEIsso} onClick={naoEIsso}><Emoji emoji="✋" className={styles.emojiBarra} /> Não é isso</button>
+        <button type="button" className={styles.sim} onClick={sim}><Emoji emoji="👍" className={styles.emojiBarra} /> Sim</button>
+        <button type="button" className={styles.nao} onClick={nao}><Emoji emoji="👎" className={styles.emojiBarra} /> Não</button>
         <button
           type="button"
           className={`${styles.engrenagem} ${segurando ? styles.segurando : ""}`}
@@ -531,14 +542,14 @@ export const Prancha: React.FC = () => {
           onPointerLeave={soltarSegurar}
           onContextMenu={(e) => e.preventDefault()}
         >
-          {familia ? "✓" : "⚙"}
+          {familia ? "✓" : <Emoji emoji="⚙" className={styles.emojiBarra} />}
         </button>
       </div>
       )}
 
       {tela && (
         <h1 className={styles.titulo}>
-          <span aria-hidden>{tela.emoji}</span> {parteDor ? `${parteDor}. Quanto?` : grupoId ? `${tela.rotulo} · ${tela.itens.find((i) => i.id === grupoId)?.rotulo ?? ""}` : tela.rotulo}
+          <Emoji emoji={tela.emoji} className={styles.tituloEmoji} /> {parteDor ? `${parteDor}. Quanto?` : grupoId ? `${tela.rotulo} · ${tela.itens.find((i) => i.id === grupoId)?.rotulo ?? ""}` : tela.rotulo}
         </h1>
       )}
 
@@ -547,14 +558,14 @@ export const Prancha: React.FC = () => {
       {/* destaque do que foi dito */}
       {destaque && !chamando && (
         <div className={styles.destaque} role="dialog" aria-live="assertive" onClick={() => setDestaque(null)}>
-          {destaque.foto ? <img src={destaque.foto} alt="" /> : destaque.emoji ? <span className={styles.destaqueEmoji}>{destaque.emoji}</span> : null}
+          {destaque.foto ? <img src={destaque.foto} alt="" /> : destaque.emoji ? <Emoji emoji={destaque.emoji} className={styles.destaqueEmoji} /> : null}
           <span className={styles.destaqueTexto}>{destaque.texto}</span>
           {pessoa && (
             <span className={styles.acoesPessoa} onClick={(e) => e.stopPropagation()}>
               <button type="button" onClick={() => dizer(`Chama ${pessoa.rotulo} aqui, por favor.`, pessoa.emoji, pessoa.foto, true)}>Chamar aqui</button>
               <button type="button" onClick={() => dizer(`Como está ${pessoa.rotulo}?`, pessoa.emoji, pessoa.foto, true)}>Como está?</button>
               <button type="button" onClick={() => dizer(`Quero ver ${pessoa.rotulo}.`, pessoa.emoji, pessoa.foto, true)}>Quero ver</button>
-              <button type="button" className={styles.ligar} onClick={() => dizer(`Quero ligar para ${pessoa.rotulo}.`, pessoa.emoji, pessoa.foto, true)}>📞 Quero ligar</button>
+              <button type="button" className={styles.ligar} onClick={() => dizer(`Quero ligar para ${pessoa.rotulo}.`, pessoa.emoji, pessoa.foto, true)}><Emoji emoji="📞" className={styles.emojiBarra} /> Quero ligar</button>
               <button type="button" className={styles.fechar} onClick={() => { setDestaque(null); setPessoa(null); }}>✕ Fechar</button>
             </span>
           )}
@@ -564,7 +575,7 @@ export const Prancha: React.FC = () => {
       {/* chamando */}
       {chamando && (
         <div className={styles.chamando} role="alertdialog" aria-label="Chamando alguém">
-          <span className={styles.sino} aria-hidden>🔔</span>
+          <Emoji emoji="🔔" className={styles.sino} />
           <p>{t("Preciso de ajuda!")}</p>
           <button type="button" onClick={pararDeChamar}>Já vim — desligar</button>
         </div>
@@ -678,7 +689,7 @@ const EditorItem: React.FC<{
 
         <div className={styles.fotoEditor}>
           <div className={styles.fotoPrevia}>
-            {item.foto ? <img src={item.foto} alt="" /> : <span className={styles.emoji}>{item.emoji}</span>}
+            {item.foto ? <img src={item.foto} alt="" /> : <Emoji emoji={item.emoji} className={styles.emoji} />}
           </div>
           <div className={styles.fotoAcoes}>
             <button type="button" className={styles.primario} onClick={() => camera.current?.click()} disabled={carregando}>📷 Tirar foto</button>

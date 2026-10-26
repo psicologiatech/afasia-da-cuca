@@ -75,21 +75,25 @@ export const CONTEUDO_INICIAL: DadosPrancha = {
   ],
 };
 
+// Partes do corpo: em vez de emoji (vários diziam outra coisa, como 🤢 = enjoo),
+// cada card mostra o mesmo bonequinho com a parte pintada (componente FiguraCorpo).
+// O emoji fica só como reserva.
 export const PARTES_DOR = [
   { id: "cabeca", rotulo: "Cabeça", emoji: "🤕" },
-  { id: "garganta", rotulo: "Garganta", emoji: "😮" },
-  { id: "peito", rotulo: "Peito", emoji: "🫀" },
-  { id: "barriga", rotulo: "Barriga", emoji: "🤢" },
-  { id: "costas", rotulo: "Costas", emoji: "🧍" },
+  { id: "garganta", rotulo: "Garganta", emoji: "🤕" },
+  { id: "peito", rotulo: "Peito", emoji: "🤕" },
+  { id: "barriga", rotulo: "Barriga", emoji: "🤕" },
+  { id: "costas", rotulo: "Costas", emoji: "🤕" },
   { id: "braco", rotulo: "Braço", emoji: "💪" },
   { id: "perna", rotulo: "Perna", emoji: "🦵" },
   { id: "outro", rotulo: "Outro lugar", emoji: "❓" },
 ];
 
+// Rostos de dor em vez de choro: 😭 lia como tristeza e soava infantil.
 export const INTENSIDADE_DOR = [
   { id: "pouco", rotulo: "Pouco", emoji: "😕", fala: "Dói pouco.", cor: "#e3b84f" },
   { id: "medio", rotulo: "Mais ou menos", emoji: "😣", fala: "Dói mais ou menos.", cor: "#e67e22" },
-  { id: "muito", rotulo: "Muito", emoji: "😭", fala: "Dói muito!", cor: "#c0392b" },
+  { id: "muito", rotulo: "Muito", emoji: "😫", fala: "Dói muito!", cor: "#c0392b" },
 ];
 
 export function comGenero(texto: string, genero: Genero): string {
